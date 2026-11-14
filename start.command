@@ -11,16 +11,17 @@ if [ ! -x .venv/bin/python ]; then
   echo "Setting up Python (first time only)..."
   python3 -m venv .venv || { echo "python3 is missing. Install it from python.org, then double-click again."; read -r -p "Press Return to close."; exit 1; }
   .venv/bin/python -m pip install --quiet --upgrade pip
-  .venv/bin/python -m pip install --quiet bleak || { echo "Could not install the Bluetooth library (bleak)."; read -r -p "Press Return to close."; exit 1; }
 fi
+.venv/bin/python -c "import bleak, serial" 2>/dev/null || .venv/bin/python -m pip install --quiet bleak pyserial || { echo "Could not install the Bluetooth/USB libraries (bleak, pyserial). Is the internet on?"; read -r -p "Press Return to close."; exit 1; }
 [ -f .env ] || cp env.example .env
 for name in DEEPGRAM_API_KEY GEMINI_API_KEY STRIPE_SECRET_KEY; do
   grep -Eq "^${name}=.+" .env || echo "Not set yet: $name (add it on the page that opens, under Keys)"
 done
 (sleep 4; open "http://127.0.0.1:8765") &
 echo
-echo "Close the Vexo dashboard tab if it is open. Then DOUBLE-TAP the band (its light blinks blue)."
-echo "If macOS asks whether Terminal may use Bluetooth, press Allow, then double-click this file again."
+echo "先关掉 Vexo 的 dashboard 网页（如果开着）。程序会反复找手环，最多 4 分钟，不用着急。"
+echo "如果 macOS 弹窗问「终端想要使用蓝牙」，点「允许」，然后重新双击 start.command。"
+echo "手环没反应就用 USB-C 线把它接到这台电脑上。"
 echo
 .venv/bin/python app.py "$@"
 echo

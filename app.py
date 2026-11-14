@@ -39,6 +39,7 @@ from vexo_open.transports.sim import SimTransport        # noqa: E402
 import billing                                           # noqa: E402
 import brain                                             # noqa: E402
 import keys                                              # noqa: E402
+import link                                              # noqa: E402
 import voice                                             # noqa: E402
 import web                                               # noqa: E402
 
@@ -428,8 +429,8 @@ def main():
     if args.transport == "sim":
         band = Band.connect(number, transport=SimTransport(number, auto_tap=False))
     else:
-        print("Double-tap the band now (its light blinks blue), then wait...")
-        band = Band.connect(number, transport=args.transport, auto_reconnect=True)
+        band, args.transport = link.connect(number, args.transport)
+        print("连上了：%s（%s）" % (band.name, "USB" if args.transport == "serial" else "蓝牙"))
 
     hub = Hub(band, args, config)
     server = web.start(hub, args.port)

@@ -157,6 +157,7 @@ near you. Saved job records (`jobs/`) stay on this computer and are not committe
 | `voice.py` | Speaks the draft |
 | `web.py`, `static/index.html` | The live page |
 | `keys.py` | Saves keys typed on the page into `.env` |
+| `link.py` | Finds the band: USB cable if plugged in, else Bluetooth with retries and plain-words diagnosis |
 | `tests/` | Offline tests |
 | `AGENTS.md` | Notes for AI coding agents working on this repo |
 

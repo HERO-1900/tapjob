@@ -17,7 +17,7 @@ Read `README.md` first, then `vexo-open-kit/AGENTS.md` for the band's own rules.
 - **Stripe test mode only.** `billing.py` refuses live keys on purpose. Leave that check in.
 - **The model never does the sums.** Prices times quantities, labor and totals stay in
   `brain.make_draft`. The model only fills the fields in `GEMINI_SCHEMA`.
-- **Standard library only**, plus `bleak` for Bluetooth. Do not add packages on demo day.
+- **Standard library only**, plus `bleak` (Bluetooth) and `pyserial` (USB cable). Do not add packages on demo day.
 - **Handlers stay short.** A function given to `band.on(...)` only puts a note in
   `hub.inbox`; the main loop in `Hub.run` does the work. Never call a network service from
   a handler.
