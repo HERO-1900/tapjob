@@ -152,7 +152,7 @@ INVENT = (
     "say at work into a bill. Honour the job: every job has a hero. "
     "title: the job in two to four plain words. hero: an original hero name of two or three words, never "
     "an existing character, person or brand. power: one short sentence, what this hero does, in the "
-    "present tense, no exclamation mark. business: a plausible invented business name. "
+    "present tense, starting with a verb, no he or she, no exclamation mark. business: a plausible invented business name. "
     "emoji: one emoji for the job. suit and cape: two hex colours (#rrggbb) that look good together and "
     "suit the job; the suit must not be near white. gear: what is on the hero's head. "
     "bills_labor: true only if this job normally charges by the hour; then labor_rate is a typical "

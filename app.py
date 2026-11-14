@@ -193,10 +193,12 @@ class Hub:
 
     # ---- the job ------------------------------------------------------------------------
 
-    def tap(self):
+    def tap(self, by_hand=False):
         now = time.time()
         if now - self.last_tap < 1.2:                        # one double-tap, reported twice
             return
+        if not by_hand and voice.speaking() and self.state["phase"] != "recording":
+            return                                           # the loudspeaker shook the band: not a tap
         self.last_tap = now
         phase = self.state["phase"]
         if phase == "idle":
@@ -390,7 +392,7 @@ class Hub:
             if self.sim is not None:
                 self.sim.tap("double-tap")                   # through the real protocol, like a wrist
             else:
-                self.tap()
+                self.tap(by_hand=True)                       # a click on the page is never the loudspeaker
         elif kind == "say" and self.state["phase"] == "recording" and value:
             self.typed.append(str(value)[:2000])
             with self.lock:
@@ -484,6 +486,8 @@ def demo_script(hub):
     if not wait_for("draft", 60):
         return
     time.sleep(hub.config["ignore_taps_after_draft_s"] + 0.5)
+    while voice.speaking():                                  # let it finish reading the draft
+        time.sleep(0.2)
     hub.inbox.put(("page-tap", None))
     if not wait_for("sent", 30):
         return

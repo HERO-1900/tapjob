@@ -1,8 +1,13 @@
 # TapJob
 
-**The invoice that writes itself while you work.** A wrist band for tradespeople: double-tap,
-talk while you fix the sink, double-tap again, and the customer gets a payment link. The band
-turns green when they pay. No phone in your hand, no paperwork at the kitchen table at 9 pm.
+**Every job has a hero. Say it, tap it, get paid.** A wrist band for people whose hands are
+busy: double-tap, say what you did or what was ordered, double-tap again, and the customer
+gets a payment link. The band turns green when they pay. No phone in your hand, no register,
+no paperwork at the kitchen table at 9 pm.
+
+It started with a plumber's invoice. The same loop takes a drive-through order, a massage
+session or a brake job: pick the job's card (or make one from a single sentence) and the band
+brings that job's price list with it.
 
 Built at VexoHacks (Y Combinator, 14 Nov 2026) on the Vexo Open band.
 
@@ -13,8 +18,36 @@ Built at VexoHacks (Y Combinator, 14 Nov 2026) on the Vexo Open band.
 | **Double-tap** the band | Starts the job. Microphone on: the band's light is solid blue so people nearby can see it. |
 | **Talk while you work**: "Job for Mr. Wang, kitchen sink leaking. Replaced the supply hose, 18 dollars. One angle valve, 25 dollars." | Live speech-to-text. The band also times the job and how long your hands were moving. |
 | **Double-tap** | Stops. The words become a draft invoice. The computer reads it back to you. |
-| **Double-tap** to confirm | Creates a Stripe invoice. The customer scans a QR code or opens the link and pays. |
+| **Double-tap**, or **raise your fist** for a second, to confirm | Creates a Stripe invoice. The customer scans a QR code or opens the link and pays. |
 | Nothing | Light goes **green**: paid. The job record (words, times, invoice) is saved. |
+
+## Every job has a hero
+
+The page opens on a card for whoever wears the band. Four come ready-made:
+
+| Card | Job | Bills | Price list |
+|---|---|---|---|
+| Leakbreaker | Plumber | parts + hours | P-trap, supply line, faucet cartridge ... |
+| Lane Captain | Drive-through order taker | items | hamburger, double cheeseburger, fries, shake ... |
+| Knot Tamer | Massage therapist | sessions | 60 and 90 minute massage, hot stones ... |
+| Torque Titan | Auto mechanic | parts + hours | oil change, brake pads, battery ... |
+
+**Any job, from one sentence.** Type "I fix rockets on the launch pad": Gemini writes the card
+(job title, hero name, colours, headgear, a starter price list, whether the job bills by the
+hour) and `roles.py` checks every field before it is used. The figure on the card is drawn by
+the page from those fields; no image is generated or downloaded.
+
+**The price list makes the money traceable.** The worker says "two double cheeseburgers and a
+shake", never a price. Gemini only matches the words to names on the list; the price is then
+looked up in plain code and the ticket marks the line `price list`. A price said out loud
+still wins, and is not marked. Nothing on the ticket is a number a model made up.
+
+**The page takes the wearer's colours**, and the band's light is drawn on the hero's raised
+wrist. Three looks (stage, comic, carbon copy) switch with one button.
+
+**Raise your fist to send.** The band reports which of its six sides points up. Teach it once
+("Teach the raised fist", under the hood); after that, holding the fist up for a second while
+a draft is waiting sends it. A double-tap still works.
 
 ## Why a band and not a phone app
 
@@ -47,8 +80,9 @@ memory, and it needs no screen:
 
 Design rules we kept:
 
-- **The model never does arithmetic.** Gemini only pulls out what was said (customer, parts,
-  prices, hours). Quantities times prices, labor and the total are computed in `brain.py`.
+- **The model never does arithmetic and never sets a price.** Gemini only pulls out what was
+  said (customer, parts, prices, hours) and matches names to the price list. Prices from the
+  list, quantities times prices, labor and the total are computed in `brain.py` and `roles.py`.
 - **Nothing is invented.** A part with no spoken price goes on the draft at $0 with a warning.
 - **A human confirms before money moves.** The third double-tap (or the Send button) is the
   only way an invoice is created.
@@ -59,9 +93,11 @@ Design rules we kept:
 
 ## Sponsor technology used
 
-- **Vexo Open band**: double-tap events, Opus microphone stream, activity stream, LED.
+- **Vexo Open band**: double-tap events, orientation events (the raised fist), Opus microphone
+  stream, activity stream, LED, over the USB cable or Bluetooth.
 - **Deepgram**: live speech-to-text (through the kit's `speech.py`), text-to-speech for the read-back.
-- **Google Gemini 4** (`gemini-4-hydrogen` by default): structured output, words to invoice fields.
+- **Google Gemini 4** (`gemini-4-hydrogen` by default): structured output twice: words to invoice
+  fields, and one sentence to a job card.
 - **Stripe**: customers, invoice items, invoices, hosted payment page, in test mode.
 
 Not used: Pipecat. The voice loop here is a small state machine of our own.
@@ -86,7 +122,7 @@ python3 app.py --sim                 # or drive it yourself: open http://127.0.0
 **With your band** (42 = the number on your band's bag):
 
 ```bash
-python3 -m pip install bleak         # Bluetooth for Python
+python3 -m pip install bleak pyserial   # Bluetooth and the USB cable, for Python
 python3 app.py 42                    # double-tap the band first: its light blinks blue
 ```
 
@@ -116,7 +152,7 @@ Copy `config.example.json` to `config.json`: business name, hourly rate, tap sen
 python3 -m unittest discover -s tests -v
 ```
 
-Eight checks, no band, keys or internet needed. Gemini and Stripe are answered by stand-ins,
+Ten checks, no band, keys or internet needed. Gemini and Stripe are answered by stand-ins,
 so the tests cover what we send and how we read the answers. The last one runs the whole
 loop against the kit's pretend band.
 
@@ -153,6 +189,7 @@ near you. Saved job records (`jobs/`) stay on this computer and are not committe
 |---|---|
 | `app.py` | The hub: band, state machine, main loop |
 | `brain.py` | Words to fields (Gemini / OpenAI / rules), fields to money |
+| `roles.py` | The jobs: price lists, the card from one sentence, the price lookup |
 | `billing.py` | Stripe test-mode invoice, or the demo pay page |
 | `voice.py` | Speaks the draft |
 | `web.py`, `static/index.html` | The live page |

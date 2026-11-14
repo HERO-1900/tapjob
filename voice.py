@@ -9,11 +9,20 @@ import ssl
 import subprocess
 import tempfile
 import threading
+import time
 import urllib.request
 
 SPEAK_URL = "https://api.deepgram.com/v1/speak?model=%s"
 MODELS = [os.environ.get("DEEPGRAM_TTS_MODEL", "aura-2-thalia-en"), "aura-asteria-en"]
 _line = threading.Lock()                       # one sentence at a time
+_waiting = 0                                   # sentences asked for and not yet finished
+_ended = 0.0                                   # when the last one finished
+
+
+def speaking(grace=0.6):
+    """True while the computer is talking, and for a moment after. The band lies next to the
+    loudspeaker on a desk: its voice can shake it into a double-tap, so taps then do not count."""
+    return _waiting > 0 or time.time() - _ended < grace
 
 
 def _deepgram(text):
@@ -51,8 +60,17 @@ def _say(text):
 
 
 def speak(text):
+    global _waiting
+
     def work():
-        with _line:
-            if not _deepgram(text) and not _say(text):
-                print("(no voice on this computer) " + text)
+        global _waiting, _ended
+        try:
+            with _line:
+                if not _deepgram(text) and not _say(text):
+                    print("(no voice on this computer) " + text)
+        finally:
+            _waiting -= 1
+            _ended = time.time()
+
+    _waiting += 1
     threading.Thread(target=work, daemon=True).start()
