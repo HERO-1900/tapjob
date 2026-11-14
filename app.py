@@ -53,6 +53,9 @@ DEFAULTS = {
     "active_motion_g": 0.04,       # wrist motion above this counts as "hands working" (a guess: tune it)
     "ignore_taps_after_start_s": 3.0,
     "ignore_taps_after_draft_s": 4.0,   # a second tap right after "stop" must not send the invoice
+    "raise_face": "",              # which side of the band points up when the fist is raised ("+x" .. "-z");
+                                   # taught from the page ("Teach the raised fist"), kept in config.json
+    "raise_hold_s": 1.0,           # hold the fist up this long to send the draft
 }
 
 SAMPLE_SAY = ("Job for Mr. Wang, kitchen sink is leaking under the cabinet. "
@@ -105,6 +108,10 @@ class Hub:
         self.roles = [dict(role) for role in roles.PRESETS]          # the ready-made jobs, then invented ones
         self.roles[0].update(business=config["business_name"], labor_rate=float(config["labor_rate"]))
         self.role = self.roles[0]
+        self.face = None                     # which side of the band points up (from its orientation events)
+        self.face_at = 0.0
+        self.teach_at = 0.0                  # when to read the face for "this is my raised fist"
+        self.draft_at = 0.0
         self.state = {
             "phase": "idle", "band": band.name, "link": args.transport,
             "led": {"color": "#ffffff", "pattern": "breathe", "note": "ready"},
@@ -112,6 +119,7 @@ class Hub:
             "transcript": [], "interim": "", "draft": None, "invoice": None,
             "log": [], "services": {"speech": "off", "brain": brain.provider(), "billing": self.biller.label},
             "business": self.role["business"], "role": self.role, "roles": self.roles, "making_role": False,
+            "face": None, "raise_face": config.get("raise_face") or "", "teaching": False,
         }
 
     # ---- small helpers -------------------------------------------------------------------
@@ -152,6 +160,12 @@ class Hub:
 
     def on_double_tap(self, _event):
         self.inbox.put(("tap", None))
+
+    def on_orientation(self, event):
+        face = getattr(event, "face", None)
+        if face is None and isinstance(event, dict):
+            face = event.get("face")
+        self.inbox.put(("face", face))
 
     def on_audio(self, packet):
         ears = self.ears
@@ -333,6 +347,35 @@ class Hub:
             role["hero"], role["title"], role["business"], len(role["price_list"])))
         self.say("%s. Ready." % role["hero"])
 
+    def gestures(self):
+        """The raised fist: taught once, then it sends the draft. Called from the main loop."""
+        now = time.time()
+        if self.teach_at and now >= self.teach_at:
+            self.teach_at = 0.0
+            self.set(teaching=False)
+            if not self.face:
+                self.note("The band has not said which way it points yet. Move your arm, then teach again.")
+                self.say("I could not feel the band. Try again.")
+                return
+            self.config["raise_face"] = self.face
+            self.set(raise_face=self.face)
+            try:                                             # remembered for the next start
+                path = HERE / "config.json"
+                saved = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+                saved["raise_face"] = self.face
+                path.write_text(json.dumps(saved, indent=2) + "\n", encoding="utf-8")
+            except (OSError, ValueError) as problem:
+                self.note("Could not save the gesture in config.json: %s" % problem)
+            self.note("Raised fist learned: the band points %s up. Hold it up for a second to send a draft." % self.face)
+            self.say("Got it. Raise your fist to send.")
+            return
+        raised = self.config.get("raise_face")
+        if (raised and self.state["phase"] == "draft" and self.face == raised
+                and self.face_at >= self.draft_at            # raised after the draft was read out, not before
+                and now - self.face_at >= float(self.config["raise_hold_s"])):
+            self.note("Fist raised: sending.")
+            self.send_invoice()
+
     def reset(self):
         self.set(phase="idle", started=None, stopped=None, active_seconds=0, transcript=[], interim="",
                  draft=None, invoice=None)
@@ -358,6 +401,13 @@ class Hub:
             self.discard()
         elif kind == "role":
             self.use_role(value)
+        elif kind == "face" and value is not None:
+            self.face, self.face_at = str(value), time.time()
+            self.set(face=self.face)
+        elif kind == "teach-raise":
+            self.teach_at = time.time() + 3.0
+            self.set(teaching=True)
+            self.say("Raise your fist to the sky and hold it.")
         elif kind == "demo-pay" and value:
             self.paid_demo.add(value)
             self.next_poll = 0
@@ -387,8 +437,10 @@ class Hub:
         band.on("double-tap", self.on_double_tap)
         band.on("audio", self.on_audio)
         band.on("activity", self.on_activity)
+        band.on("orientation", self.on_orientation)
         try:
-            band.set_events(kinds=["double-tap", "motion"], tap_threshold=self.config["tap_threshold_g"])
+            band.set_events(kinds=["double-tap", "motion", "orientation"],
+                            tap_threshold=self.config["tap_threshold_g"])
         except (VexoError, TypeError, ValueError):
             pass
         band.configure(events=True, activity=True)
@@ -403,6 +455,7 @@ class Hub:
                 except queue.Empty:
                     break
                 self.act(kind, value)
+            self.gestures()
             if self.state["phase"] == "sent":
                 self.check_paid()
             if self.state["phase"] == "paid" and self.args.demo:

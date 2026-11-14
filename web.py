@@ -10,7 +10,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 PAGE = Path(__file__).resolve().parent / "static" / "index.html"
-ACTIONS = {"page-tap", "send", "discard", "say", "role"}
+ACTIONS = {"page-tap", "send", "discard", "say", "role", "teach-raise"}
 
 
 def start(hub, port):

@@ -180,10 +180,11 @@ def _listed(words, role, already):
     text, parts = " " + roles._plain(words) + " ", []
     for name, _price in sorted((role or {}).get("price_list") or [], key=lambda row: -len(row[0])):
         plain = roles._plain(name)
-        if not plain or plain in have:
-            continue
-        spot = re.search(r"(?:\b([a-z]+|\d+(?:\.\d+)?) )?%s\b" % re.escape(plain), text)
+        spot = re.search(r"(?:\b([a-z]+|\d+(?:\.\d+)?) )?%s\b" % re.escape(plain), text) if plain else None
         if not spot:
+            continue
+        if plain in have:                            # already on the draft with a said price: just not twice
+            text = text[:spot.start()] + " " * (spot.end() - spot.start()) + text[spot.end():]
             continue
         quantity = _number(spot.group(1)) if spot.group(1) else None
         parts.append({"description": name, "quantity": quantity or 1.0, "unit_price": None})
