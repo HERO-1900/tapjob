@@ -4,93 +4,208 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TapJob</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#101418; --soft:#5d6873; --line:#e3e7ea; --bg:#f5f6f4; --card:#fff; --go:#0a7d2c; --warn:#b25e00; }
+  /* The page is the yellow customer copy of a carbonless invoice book; the ticket is the white top copy. */
+  :root {
+    --canary:#f4dc62; --canary-deep:#e6c93f; --ink:#18245c; --form:#3552b8; --rule:#b9c6ec;
+    --paper:#fefdf7; --pen:#14171f; --serial:#c8281f; --paid:#1f8a45;
+    --print:"Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+    --text:"Barlow", "Helvetica Neue", Arial, sans-serif;
+    --hand:"Kalam", "Bradley Hand", "Noteworthy", "Marker Felt", cursive;
+  }
   * { box-sizing:border-box; }
-  body { margin:0; font:16px/1.45 -apple-system, "Segoe UI", system-ui, sans-serif; color:var(--ink); background:var(--bg); }
-  header { display:flex; align-items:baseline; gap:14px; padding:18px 28px 8px; }
-  header h1 { margin:0; font-size:26px; letter-spacing:-.02em; }
-  header span { color:var(--soft); }
-  main { display:grid; grid-template-columns: 300px 1fr 1.1fr; gap:18px; padding:12px 28px 28px; align-items:start; }
-  @media (max-width: 1000px) { main { grid-template-columns:1fr; } }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
-  h2 { margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--soft); }
-  #phase { font-size:34px; font-weight:700; letter-spacing:-.02em; margin:6px 0 2px; }
-  #hint { color:var(--soft); min-height:3em; }
-  #clock { font:600 22px ui-monospace, Menlo, monospace; margin-top:8px; }
-  .led { display:flex; align-items:center; gap:12px; margin:14px 0 4px; }
-  #dot { width:34px; height:34px; border-radius:50%; background:#fff; border:1px solid #c9cfd4; box-shadow:0 0 18px currentColor; }
-  #dot.blink { animation:blink .9s steps(2) infinite; } #dot.breathe { animation:breathe 2.4s ease-in-out infinite; }
-  @keyframes blink { 50% { opacity:.15; } } @keyframes breathe { 50% { opacity:.3; } }
-  button { font:inherit; font-weight:600; padding:10px 14px; border-radius:10px; border:1px solid var(--ink); background:#fff; cursor:pointer; }
-  button.main { background:var(--ink); color:#fff; } button.go { background:var(--go); border-color:var(--go); color:#fff; }
-  button:disabled { opacity:.35; cursor:default; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
-  textarea { width:100%; min-height:70px; margin-top:12px; padding:8px 10px; font:inherit; border:1px solid var(--line); border-radius:10px; }
-  #words { min-height:180px; font-size:19px; } #words i { color:var(--soft); }
-  table { width:100%; border-collapse:collapse; } td { padding:8px 0; border-bottom:1px solid var(--line); vertical-align:top; }
-  td.n { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
-  tr.total td { border:0; border-top:2px solid var(--ink); font-weight:700; font-size:20px; padding-top:12px; }
-  .tag { font-size:12px; padding:2px 7px; border-radius:99px; background:#eef1f3; color:var(--soft); margin-left:6px; white-space:nowrap; }
-  .warn { color:var(--warn); margin:10px 0 0; font-size:14px; }
-  #paid { display:none; margin-top:14px; padding:14px; border-radius:12px; background:var(--go); color:#fff; font-weight:700; font-size:24px; text-align:center; }
-  #pay { display:none; margin-top:14px; gap:16px; align-items:center; } #pay img { width:150px; height:150px; border:1px solid var(--line); border-radius:8px; }
-  #pay a { word-break:break-all; }
-  #log { font:12.5px/1.5 ui-monospace, Menlo, monospace; color:var(--soft); max-height:150px; overflow:auto; white-space:pre-wrap; }
-  small { color:var(--soft); }
+  html, body { height:100%; }
+  body { margin:0; display:grid; grid-template-rows:auto auto auto minmax(0,1fr) auto; font:17px/1.4 var(--text); color:var(--ink); background:var(--canary); }
+  button, input, textarea { font:inherit; color:inherit; }
+  :focus-visible { outline:3px solid var(--ink); outline-offset:2px; }
+
+  .top { display:flex; align-items:baseline; gap:16px; padding:16px 34px 6px; }
+  .brand { margin:0; font:700 38px/1 var(--print); letter-spacing:-.01em; }
+  .shop { font:500 21px/1 var(--print); }
+  .link { margin-left:auto; display:flex; align-items:center; gap:8px; font:500 18px/1 var(--print); }
+  .link b { width:10px; height:10px; border-radius:50%; background:var(--paid); }
+  .link.off b { background:var(--serial); }
+
+  .setup { margin:4px 34px 0; }
+  .setup summary { cursor:pointer; width:max-content; font:500 16px/1.2 var(--print); padding:3px 0; }
+  .keys { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; padding:10px 0 4px; }
+  .key label { display:block; font:600 17px/1.2 var(--print); }
+  .key small { display:block; font-size:14px; min-height:1.4em; }
+  .key small.ok { color:var(--paid); font-weight:600; }
+  .key small.bad { color:var(--serial); font-weight:600; }
+  .key div { display:flex; gap:6px; }
+  .key input { flex:1; min-width:0; padding:7px 10px; border:1.5px solid var(--ink); border-radius:3px; background:var(--paper); }
+
+  main { display:grid; grid-template-columns:minmax(240px,290px) minmax(0,1fr) minmax(380px,470px); gap:34px; padding:14px 34px 18px; min-height:0; }
+  h2 { margin:0 0 8px; font:600 20px/1.1 var(--print); }
+
+  /* the band */
+  .band { display:flex; flex-direction:column; min-height:0; }
+  .wrist { flex:none; width:225px; height:94px; display:block; margin:0 0 12px; }
+  #led { fill:#fff; color:#fff; filter:drop-shadow(0 0 7px currentColor) drop-shadow(0 0 14px currentColor); }
+  #led.blink { animation:blink .9s steps(2) infinite; }
+  #led.breathe { animation:breathe 2.6s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity:.12; } }
+  @keyframes breathe { 50% { opacity:.3; } }
+  #phase { font:700 46px/1 var(--print); letter-spacing:-.01em; margin:2px 0 6px; }
+  #hint { min-height:3em; }
+  #clock { font:600 30px/1 var(--print); font-variant-numeric:tabular-nums; margin:6px 0 2px; min-height:30px; }
+  #lednote { font-size:14px; opacity:.8; }
+  .steps { list-style:none; display:flex; margin:10px 34px 0; padding:0; counter-reset:step; font:500 18px/1.2 var(--print); }
+  .steps li { counter-increment:step; flex:1 1 auto; display:flex; align-items:center; gap:8px; white-space:nowrap; color:rgba(24,36,92,.55); }
+  .steps li:last-child { flex:0 0 auto; }
+  .steps li::before { content:counter(step); flex:none; display:grid; place-items:center; width:24px; height:24px; border:1.5px solid currentColor; border-radius:50%; font-size:14px; }
+  .steps li:not(:last-child)::after { content:""; flex:1; min-width:14px; height:1.5px; margin:0 12px 0 4px; background:currentColor; opacity:.5; }
+  .steps li.done { color:rgba(24,36,92,.8); }
+  .steps li.done::before { content:"✓"; background:var(--ink); border-color:var(--ink); color:var(--canary); }
+  .steps li.now { color:var(--ink); font-weight:700; }
+  .steps li.now::before { background:var(--ink); border-color:var(--ink); color:var(--canary); }
+  .acts { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; padding-top:14px; }
+  button { cursor:pointer; padding:9px 14px; border:1.5px solid var(--ink); border-radius:3px; background:transparent; font:600 18px/1 var(--print); }
+  button.solid { background:var(--ink); color:var(--canary); }
+  button.pay { background:var(--paid); border-color:var(--paid); color:#fff; }
+  button:disabled { opacity:.3; cursor:default; }
+
+  /* what the band heard */
+  .heard { display:flex; flex-direction:column; min-height:0; }
+  #words { flex:1; min-height:0; overflow:auto; font:500 27px/1.32 var(--text); }
+  #words div { margin-bottom:.45em; }
+  #words i { font-style:normal; opacity:.55; }
+  #words small { font-size:18px; font-weight:400; opacity:.75; }
+  .typing { margin-top:10px; font-size:15px; }
+  .typing summary { cursor:pointer; width:max-content; }
+  .typing textarea { display:block; width:100%; min-height:64px; margin:8px 0; padding:8px 10px; border:1.5px solid var(--ink); border-radius:3px; background:var(--paper); }
+
+  /* the ticket: the white top copy */
+  .ticket { position:relative; display:flex; flex-direction:column; min-height:0; overflow:hidden; background:var(--paper); color:var(--pen);
+            padding:30px 26px 18px; border-radius:2px; box-shadow:0 1px 0 var(--canary-deep), 0 22px 34px -22px rgba(24,36,92,.7); }
+  .ticket::before { content:""; position:absolute; inset:0 0 auto 0; height:16px; background:radial-gradient(circle at 9px 8px, var(--canary) 3.2px, transparent 3.6px) 0 0/18px 16px repeat-x; }
+  .thead { display:flex; align-items:baseline; justify-content:space-between; gap:12px; color:var(--form); border-bottom:2px solid var(--form); padding-bottom:6px; }
+  .thead strong { font:700 25px/1 var(--print); }
+  .serial { font:600 21px/1 var(--print); color:var(--serial); letter-spacing:.04em; white-space:nowrap; }
+  .field { display:flex; align-items:baseline; gap:10px; border-bottom:1px solid var(--rule); padding:7px 0 2px; }
+  .field span, .cols span, .sum span, .foot { font:500 15px/1.2 var(--print); color:var(--form); }
+  .field span { flex:none; width:68px; }
+  .field output { font:400 21px/1.2 var(--hand); min-height:25px; }
+  #cust { font-weight:700; font-size:24px; }
+  .cols { display:flex; justify-content:space-between; padding:9px 0 3px; border-bottom:1px solid var(--form); }
+  #lines { flex:1; min-height:68px; overflow:auto; background:repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px); }
+  .line { display:flex; align-items:baseline; justify-content:space-between; gap:12px; min-height:34px; padding-top:5px; font:400 20px/1.2 var(--hand); }
+  .line em { font:500 13px/1 var(--print); font-style:normal; color:var(--form); margin-left:8px; white-space:nowrap; }
+  .line em.miss { color:var(--serial); }
+  .line b { font-weight:400; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .blank { padding:8px 0; font:400 17px/1.35 var(--text); color:var(--form); }
+  .sum { display:flex; align-items:baseline; justify-content:flex-end; gap:14px; border-top:2px solid var(--form); padding-top:6px; }
+  .sum span { font-size:19px; font-weight:600; }
+  #total { font:700 34px/1.1 var(--hand); min-width:110px; text-align:right; }
+  .notes p { margin:6px 0 0; font:400 17px/1.25 var(--hand); color:var(--serial); }
+  .foot { margin:8px 0 0; font-size:14px; }
+  #pay { display:none; flex:none; gap:14px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px dashed var(--form); }
+  #pay img { width:96px; height:96px; flex:none; }
+  #pay p { margin:0; font:600 19px/1.2 var(--print); color:var(--form); }
+  #pay a { display:block; margin-top:4px; font:400 13px/1.3 var(--text); color:var(--form); word-break:break-all; }
+  #stamp { display:none; position:absolute; right:24px; bottom:92px; padding:4px 18px 2px; border:5px double var(--paid); border-radius:6px; color:var(--paid);
+           font:700 62px/1 var(--print); letter-spacing:.08em; transform:rotate(-11deg); mix-blend-mode:multiply; opacity:.88; }
+  #stamp small { display:block; font:600 15px/1.3 var(--print); letter-spacing:.06em; text-align:center; }
+  #stamp.on { display:block; animation:stamp .34s cubic-bezier(.2,1.5,.4,1) both; }
+  @keyframes stamp { from { transform:rotate(-11deg) scale(2.3); opacity:0; } }
+
+  .hood { padding:0 34px 12px; font-size:14px; }
+  .hood summary { cursor:pointer; width:max-content; font:500 15px/1.2 var(--print); opacity:.8; }
+  #log { max-height:120px; overflow:auto; white-space:pre-wrap; margin-top:6px; font-size:13px; line-height:1.5; }
+
+  @media (max-width: 980px) {
+    html, body { height:auto; } body { display:block; }
+    main { grid-template-columns:1fr; } .keys { grid-template-columns:1fr; } .acts { margin-top:14px; } .steps { flex-wrap:wrap; gap:6px 0; }
+    #words { min-height:120px; } .ticket { overflow:visible; }
+  }
+  @media (prefers-reduced-motion: reduce) { #led.blink, #led.breathe, #stamp.on { animation:none; } }
 </style>
 </head>
 <body>
-<header><h1>TapJob</h1><span id="who"></span></header>
+<header class="top">
+  <h1 class="brand">TapJob</h1>
+  <span class="shop" id="shop"></span>
+  <span class="link off" id="link"><b></b><span id="linktext">Looking for the band</span></span>
+</header>
+
+<details class="setup" id="setup">
+  <summary id="setupsum">Keys</summary>
+  <div class="keys" id="keys"></div>
+</details>
+
+<ol class="steps" id="steps">
+  <li>Double-tap the band</li>
+  <li>Talk while you work</li>
+  <li>Check the ticket</li>
+  <li>Send it</li>
+  <li>Get paid</li>
+</ol>
+
 <main>
-  <section class="card" id="keycard" style="grid-column:1/-1;display:none">
-    <h2>Keys <small style="text-transform:none;letter-spacing:0">saved in .env on this computer, never shown again</small></h2>
-    <div id="keys" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px"></div>
-  </section>
-  <section class="card">
-    <h2>Band</h2>
-    <div id="phase">…</div>
+  <section class="band" aria-label="The band">
+    <svg class="wrist" viewBox="0 0 250 104" role="img" aria-label="The wrist band and its light">
+      <rect x="0" y="30" width="250" height="44" rx="22" fill="#18245c"/>
+      <rect x="86" y="12" width="78" height="80" rx="16" fill="#0f173d" stroke="#3552b8" stroke-width="2"/>
+      <circle id="led" cx="125" cy="52" r="9"/>
+    </svg>
+    <div id="phase">Starting</div>
     <div id="hint"></div>
-    <div class="led"><div id="dot"></div><small id="lednote"></small></div>
     <div id="clock"></div>
-    <div class="row">
-      <button class="main" id="tap">Double-tap</button>
-      <button class="go" id="send" disabled>Send invoice</button>
+    <div id="lednote"></div>
+    <div class="acts">
+      <button class="solid" id="tap" title="The same as double-tapping the band">Double-tap</button>
+      <button class="pay" id="send" disabled>Send invoice</button>
       <button id="discard" disabled>Discard</button>
     </div>
-    <textarea id="typed" placeholder="No microphone? Type what the technician says, then Add."></textarea>
-    <div class="row"><button id="add" disabled>Add words</button></div>
   </section>
 
-  <section class="card">
+  <section class="heard">
     <h2>What the band heard</h2>
-    <div id="words"></div>
+    <div id="words" aria-live="polite"></div>
+    <details class="typing">
+      <summary>No microphone? Type the words instead</summary>
+      <textarea id="typed" placeholder="Type what the technician says while a job is running."></textarea>
+      <button id="add" disabled>Add words</button>
+    </details>
   </section>
 
-  <section class="card">
-    <h2>Invoice</h2>
-    <div id="invoice"><small>Nothing yet. Double-tap the band, say what you did and what it cost, double-tap again.</small></div>
-    <div id="pay"><img id="qr" alt="QR code of the payment page"><div><b>Customer pays here</b><br><a id="link" target="_blank" rel="noopener"></a></div></div>
-    <div id="paid">PAID</div>
-  </section>
-
-  <section class="card" style="grid-column:1/-1">
-    <h2>Under the hood</h2>
-    <small id="services"></small>
-    <div id="log"></div>
+  <section class="ticket" aria-label="The invoice">
+    <div class="thead"><strong id="biz">Invoice</strong><span class="serial" id="serial"></span></div>
+    <div class="field"><span>Customer</span><output id="cust"></output></div>
+    <div class="field"><span>Job</span><output id="job"></output></div>
+    <div class="cols"><span>Parts and labor</span><span>Amount</span></div>
+    <div id="lines"></div>
+    <div class="sum"><span>Total</span><output id="total"></output></div>
+    <div class="notes" id="notes"></div>
+    <p class="foot" id="foot"></p>
+    <div id="pay"><img id="qr" alt="Code the customer scans to pay"><div><p>Customer pays here</p><a id="paylink" target="_blank" rel="noopener"></a></div></div>
+    <div id="stamp">PAID<small id="stamptime"></small></div>
   </section>
 </main>
+
+<details class="hood">
+  <summary>Under the hood</summary>
+  <div id="services"></div>
+  <div id="log"></div>
+</details>
+
 <script>
 const $ = (id) => document.getElementById(id);
 const PHASES = {
-  idle: ['Ready', 'Double-tap the band to start a job.'],
-  recording: ['Listening', 'Talk while you work: what you do, the parts, what they cost. Double-tap to stop.'],
-  thinking: ['Writing the invoice', 'Turning your words into line items.'],
-  draft: ['Draft ready', 'Check it. Double-tap the band (or press Send) to send it to the customer.'],
-  sending: ['Sending', 'Creating the invoice.'],
-  sent: ['Sent', 'Waiting for the customer to pay. The band turns green when they do.'],
-  paid: ['Paid', 'Done. Double-tap for the next job.'],
+  idle: ['Ready', 'Double-tap the band to start a job.', 0],
+  recording: ['Listening', 'Say what you did, the parts, and what they cost. Double-tap to stop.', 1],
+  thinking: ['Writing the ticket', 'Turning your words into line items.', 2],
+  draft: ['Check the ticket', 'Double-tap the band to send it to the customer.', 2],
+  sending: ['Sending', 'Creating the invoice.', 3],
+  sent: ['Waiting for payment', 'The customer scans the code. The band turns green when they pay.', 3],
+  paid: ['Paid', 'Double-tap for the next job.', 5],
 };
+const LINKS = { serial: 'on the USB cable', ble: 'on Bluetooth', sim: 'pretend band' };
+const KEYS = { DEEPGRAM_API_KEY: 'Deepgram, for speech', GEMINI_API_KEY: 'Gemini, for reading the words', STRIPE_SECRET_KEY: 'Stripe test key (sk_test_…)' };
 const money = (n) => '$' + Number(n).toFixed(2);
 const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
 const post = (type, value) => fetch('/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, value }) });
@@ -100,84 +215,116 @@ $('send').onclick = () => post('send');
 $('discard').onclick = () => post('discard');
 $('add').onclick = () => { const t = $('typed').value.trim(); if (t) { post('say', t); $('typed').value = ''; } };
 
-const KEYS = { DEEPGRAM_API_KEY: 'Deepgram (speech)', GEMINI_API_KEY: 'Gemini (words to invoice)', STRIPE_SECRET_KEY: 'Stripe test key (sk_test_…)' };
+let keysKnown = null;
 function drawKeys(have) {
   const box = $('keys');
   if (!box.children.length) {
     for (const name of Object.keys(KEYS)) {
-      const row = el('div'); row.id = 'key-' + name;
-      const label = el('div', KEYS[name]); label.style.fontWeight = '600';
-      const status = el('small', ''); status.className = 'status';
-      const input = el('input'); input.type = 'password'; input.placeholder = name; input.autocomplete = 'off';
-      input.id = 'input-' + name; input.style = 'width:100%;margin:6px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit';
-      const save = el('button', 'Save'); save.id = 'save-' + name;
+      const wrap = el('div', null, 'key'); wrap.id = 'key-' + name;
+      const label = el('label', KEYS[name]); label.htmlFor = 'input-' + name;
+      const status = el('small', '');
+      const input = el('input'); input.type = 'password'; input.id = 'input-' + name; input.placeholder = 'Paste the key'; input.autocomplete = 'off';
+      const save = el('button', 'Save key');
       save.onclick = async () => {
         const value = input.value.trim(); if (!value) return;
         const r = await fetch('/keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, value }) });
-        if (r.ok) { input.value = ''; status.textContent = 'saving…'; } else { status.textContent = (await r.json()).problem; status.style.color = 'var(--warn)'; }
+        if (r.ok) { input.value = ''; status.textContent = 'Saving'; status.className = ''; }
+        else { let why = 'That key was not accepted.'; try { why = (await r.json()).problem || why; } catch (e) {} status.textContent = why; status.className = 'bad'; }
       };
-      row.append(label, status, input, save); box.append(row);
+      const row = el('div'); row.append(input, save);
+      wrap.append(label, status, row); box.append(wrap);
     }
   }
   let missing = 0;
   for (const name of Object.keys(KEYS)) {
-    const status = document.querySelector('#key-' + name + ' .status');
-    if (have[name]) { status.textContent = '✓ saved'; status.style.color = 'var(--go)'; }
-    else { missing++; if (!status.textContent || status.textContent === '✓ saved') { status.textContent = 'missing: a stand-in is used'; status.style.color = 'var(--soft)'; } }
+    const status = document.querySelector('#key-' + name + ' small');
+    if (have[name]) { status.textContent = '✓ Key saved'; status.className = 'ok'; }
+    else { missing++; if (status.className !== 'bad') { status.textContent = 'No key yet: a stand-in is used'; status.className = ''; } }
   }
-  $('keycard').style.display = 'block';
+  $('setupsum').textContent = missing ? 'Keys: ' + missing + ' of 3 still to paste' : 'Keys: all three saved';
+  const known = missing === 0;
+  if (keysKnown === null) $('setup').open = !known;          // first look: open only if something is missing
+  else if (known && !keysKnown) $('setup').open = false;     // the last key just went in
+  keysKnown = known;
 }
+
 let shownLink = '';
-function draw(s) {
-  if (s.keys) drawKeys(s.keys);
-  const [title, hint] = PHASES[s.phase] || [s.phase, ''];
-  $('phase').textContent = title; $('hint').textContent = hint;
-  $('who').textContent = s.business + ' · ' + s.band + ' (' + s.link + ')';
-  const dot = $('dot'); dot.style.background = s.led.color; dot.style.color = s.led.color;
-  dot.className = s.led.pattern === 'blink' || s.led.pattern === 'flash' ? 'blink' : s.led.pattern === 'breathe' ? 'breathe' : '';
-  $('lednote').textContent = 'band light: ' + (s.led.note || s.led.pattern);
-  $('clock').textContent = s.elapsed != null ? Math.floor(s.elapsed / 60) + ':' + String(s.elapsed % 60).padStart(2, '0') + ' on the job' : '';
-  $('send').disabled = s.phase !== 'draft'; $('discard').disabled = !(s.phase === 'draft' || s.phase === 'sent');
-  $('add').disabled = s.phase !== 'recording';
-
-  const words = $('words'); words.replaceChildren();
-  for (const line of s.transcript) words.append(el('div', line));
-  if (s.interim) words.append(el('i', s.interim));
-  if (!s.transcript.length && !s.interim) words.append(el('small', s.phase === 'recording' ? 'Listening…' : 'Words appear here while you talk.'));
-
-  const box = $('invoice');
-  if (s.draft) {
-    const d = s.draft; box.replaceChildren();
-    box.append(el('div', d.customer, 'cust')).style = 'font-size:22px;font-weight:700';
-    box.append(el('div', d.summary)).style = 'color:var(--soft);margin-bottom:8px';
-    const table = el('table');
-    for (const item of d.items) {
-      const tr = el('tr'); const name = el('td', item.description + (item.quantity !== 1 ? ' × ' + item.quantity : ''));
-      if (item.unit_price == null) name.append(el('span', 'no price said', 'tag'));
-      tr.append(name, el('td', money(item.amount), 'n')); table.append(tr);
+function drawTicket(s) {
+  const d = s.draft, lines = $('lines');
+  $('biz').textContent = s.business || 'Invoice';
+  const number = (String(s.band || '').match(/(\d+)\s*$/) || [, '00'])[1];
+  const at = s.started ? new Date(s.started * 1000) : null;
+  $('serial').textContent = 'No. ' + number + '-' + (at ? String(at.getHours()).padStart(2, '0') + String(at.getMinutes()).padStart(2, '0') : '····');
+  lines.replaceChildren(); $('notes').replaceChildren();
+  if (!d) {
+    $('cust').textContent = ''; $('job').textContent = ''; $('total').textContent = ''; $('foot').textContent = '';
+    lines.append(el('div', s.phase === 'recording' ? 'The ticket fills in when you double-tap to stop.'
+      : s.phase === 'thinking' ? 'Writing…' : 'Blank ticket. Double-tap the band, say what you did and what it cost, then double-tap again.', 'blank'));
+  } else {
+    $('cust').textContent = d.customer || ''; $('job').textContent = d.summary || '';
+    for (const item of d.items || []) {
+      const row = el('div', null, 'line'), name = el('span', item.description + (item.quantity !== 1 ? ' × ' + item.quantity : ''));
+      if (item.unit_price == null) name.append(el('em', 'no price said', 'miss'));
+      row.append(name, el('b', money(item.amount))); lines.append(row);
     }
-    const tr = el('tr'); const name = el('td', 'Labor ' + d.labor.hours + ' h at ' + money(d.labor.rate) + '/h');
-    name.append(el('span', d.labor.source, 'tag')); tr.append(name, el('td', money(d.labor.amount), 'n')); table.append(tr);
-    const total = el('tr', null, 'total'); total.append(el('td', 'Total'), el('td', money(d.total), 'n')); table.append(total);
-    box.append(table);
-    for (const w of d.warnings) box.append(el('p', w, 'warn'));
-    box.append(el('small', 'Band record: ' + d.evidence.on_site_minutes + ' min on site, hands working ' + d.evidence.hands_working_minutes + ' min. Read by ' + d.provider + '.'));
-  } else if (s.phase === 'idle') {
-    box.replaceChildren(el('small', 'Nothing yet. Double-tap the band, say what you did and what it cost, double-tap again.'));
+    if (d.labor) {
+      const row = el('div', null, 'line'), name = el('span', 'Labor ' + d.labor.hours + ' h at ' + money(d.labor.rate) + '/h');
+      name.append(el('em', d.labor.source)); row.append(name, el('b', money(d.labor.amount))); lines.append(row);
+    }
+    $('total').textContent = money(d.total);
+    for (const w of d.warnings || []) $('notes').append(el('p', w));
+    const e = d.evidence || {};
+    $('foot').textContent = 'The band timed ' + (e.on_site_minutes ?? 0) + ' min on site, ' + (e.hands_working_minutes ?? 0) + ' of them with hands working. Words read by ' + (d.provider || 'TapJob') + '.';
   }
   const inv = s.invoice;
   $('pay').style.display = inv && !inv.paid ? 'flex' : 'none';
-  $('paid').style.display = inv && inv.paid ? 'block' : 'none';
+  $('stamp').className = inv && inv.paid ? 'on' : '';
+  if (inv && inv.paid && !$('stamptime').textContent) $('stamptime').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  if (!inv || !inv.paid) $('stamptime').textContent = '';
   if (inv && inv.url !== shownLink) {
-    shownLink = inv.url; $('link').textContent = inv.url; $('link').href = inv.url;
+    shownLink = inv.url; $('paylink').textContent = inv.url; $('paylink').href = inv.url;
     $('qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(inv.url);
   }
   if (!inv) shownLink = '';
-  $('services').textContent = 'speech: ' + s.services.speech + ' · words to fields: ' + s.services.brain + ' · payment: ' + s.services.billing;
-  $('log').textContent = s.log.map((l) => new Date(l.t * 1000).toLocaleTimeString() + '  ' + l.text).reverse().join('\n');
 }
+
+function draw(s) {
+  if (s.keys) drawKeys(s.keys);
+  const [title, hint, step] = PHASES[s.phase] || [s.phase, '', 0];
+  $('phase').textContent = title; $('hint').textContent = hint;
+  $('shop').textContent = s.business || '';
+  $('link').className = 'link'; $('linktext').textContent = (s.band || 'Band') + ' ' + (LINKS[s.link] || s.link || '');
+  const led = $('led'), light = s.led || {};
+  led.style.fill = light.color || '#fff'; led.style.color = light.color || '#fff';
+  led.setAttribute('class', light.pattern === 'blink' || light.pattern === 'flash' ? 'blink' : light.pattern === 'breathe' ? 'breathe' : '');
+  $('lednote').textContent = light.note ? 'Band light: ' + light.note : '';
+  $('clock').textContent = s.elapsed != null ? Math.floor(s.elapsed / 60) + ':' + String(s.elapsed % 60).padStart(2, '0') + ' on the job' : '';
+  [...$('steps').children].forEach((li, i) => { li.className = i < step ? 'done' : i === step ? 'now' : ''; });
+  $('send').disabled = s.phase !== 'draft'; $('discard').disabled = !(s.phase === 'draft' || s.phase === 'sent');
+  $('add').disabled = s.phase !== 'recording';
+
+  const words = $('words'), heard = s.transcript || [];
+  words.replaceChildren();
+  for (const line of heard) words.append(el('div', line));
+  if (s.interim) words.append(el('i', s.interim));
+  if (!heard.length && !s.interim) words.append(el('small', s.phase === 'recording' ? 'Listening…' : 'Words show up here while you talk.'));
+  words.scrollTop = words.scrollHeight;
+
+  drawTicket(s);
+  const sv = s.services || {};
+  $('services').textContent = 'Speech: ' + sv.speech + '. Words to line items: ' + sv.brain + '. Payment: ' + sv.billing + '.';
+  $('log').textContent = (s.log || []).map((l) => new Date(l.t * 1000).toLocaleTimeString() + '  ' + l.text).reverse().join('\n');
+}
+
 async function tick() {
-  try { draw(await (await fetch('/state')).json()); } catch (e) { $('phase').textContent = 'Hub not running'; }
+  let state = null;
+  try { state = await (await fetch('/state')).json(); } catch (e) {}
+  if (!state) {
+    $('phase').textContent = 'TapJob stopped'; $('hint').textContent = 'Double-click start.command to start it again.';
+    $('link').className = 'link off'; $('linktext').textContent = 'Not connected';
+  } else {
+    try { draw(state); } catch (e) { console.error(e); $('hint').textContent = 'This page hit a problem: ' + e.message; }
+  }
   setTimeout(tick, 600);
 }
 tick();

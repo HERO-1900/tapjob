@@ -135,7 +135,7 @@ def _offline(words):
     if who:
         customer = who.group(1).strip()
     parts, hours = [], None
-    sentences = [s.strip() for s in re.split(r"(?<!\bMr)(?<!\bMs)(?<!\bDr)(?<!\bMrs)(?<=[.!?;])\s+|\n+", words)
+    sentences = [s.strip() for s in re.split(r"(?<!\bMr\.)(?<!\bMs\.)(?<!\bDr\.)(?<!\bMrs\.)(?<=[.!?;])\s+|\n+", words)
                  if s.strip()]
     for sentence in sentences:
         labor = re.search(r"(\d+(?:\.\d+)?|[a-z]+)\s+(and a half\s+|and a quarter\s+)?(hours?|hrs?|minutes?|mins?)",
@@ -146,23 +146,28 @@ def _offline(words):
                 amount += 0.5 if (labor.group(2) or "").strip().endswith("half") else 0
                 amount += 0.25 if (labor.group(2) or "").strip().endswith("quarter") else 0
                 hours = amount / 60 if labor.group(3).lower().startswith("min") else amount
-            continue
-        price = re.search(AMOUNT, sentence, re.I)
-        if not price:
-            continue
-        what = sentence[:price.start()].strip(" ,:-")
-        what = re.sub(VERBS, "", what, flags=re.I)
-        what = re.sub(r"\s+(?:for|at|costs?|was|is)$", "", what, flags=re.I).strip(" ,:-")
-        quantity = 1.0
-        first = what.split(" ", 1)
-        if len(first) == 2 and first[0].lower() not in ("a", "an", "the") and _number(first[0]) is not None:
-            quantity, what = _number(first[0]), first[1]
-        what = re.sub(r"^(?:a|an|the|one)\s+", "", what, flags=re.I)
-        if what:
-            parts.append({"description": what[:1].upper() + what[1:], "quantity": quantity,
-                          "unit_price": float(price.group(1) or price.group(2))})
-    summary = sentences[0] if sentences else "Service call"
-    summary = re.sub(r"^job for [^,]+,\s*", "", summary, flags=re.I).strip(" .")
+            sentence = sentence[:labor.start()].rstrip(" ,")           # prices may sit in the same sentence
+        start = 0
+        for price in re.finditer(AMOUNT, sentence, re.I):          # "P-trap, $18, and a supply line, $25"
+            what = sentence[start:price.start()].strip(" ,:-")
+            start = price.end()
+            what = re.sub(r"^(?:and|plus|also|then)\s+", "", what, flags=re.I)
+            what = re.sub(VERBS, "", what, flags=re.I)
+            what = re.sub(r"\s+(?:for|at|costs?|was|is)$", "", what, flags=re.I).strip(" ,:-")
+            quantity = 1.0
+            first = what.split(" ", 1)
+            if len(first) == 2 and first[0].lower() not in ("a", "an", "the") and _number(first[0]) is not None:
+                quantity, what = _number(first[0]), first[1]
+            what = re.sub(r"^(?:a|an|the|one)\s+", "", what, flags=re.I)
+            if what:
+                parts.append({"description": what[:1].upper() + what[1:], "quantity": quantity,
+                              "unit_price": float(price.group(1) or price.group(2))})
+    summary = ""
+    for sentence in sentences:                                         # the first one that says something
+        summary = re.sub(r"^job for [^,]+(?:,\s*|$)", "", sentence.strip(" ."), flags=re.I).strip(" .")
+        summary = re.split(AMOUNT, summary, maxsplit=1, flags=re.I)[0].strip(" ,:-")
+        if summary:
+            break
     summary = (summary[:1].upper() + summary[1:]) if summary else "Service call"
     return {"customer": customer, "summary": summary[:160], "parts": parts, "labor_hours": hours}
 

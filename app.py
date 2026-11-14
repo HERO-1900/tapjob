@@ -51,6 +51,7 @@ DEFAULTS = {
     "tap_threshold_g": 1.0,        # higher = a harder tap is needed (0.2 .. 8)
     "active_motion_g": 0.04,       # wrist motion above this counts as "hands working" (a guess: tune it)
     "ignore_taps_after_start_s": 3.0,
+    "ignore_taps_after_draft_s": 4.0,   # a second tap right after "stop" must not send the invoice
 }
 
 SAMPLE_SAY = ("Job for Mr. Wang, kitchen sink is leaking under the cabinet. "
@@ -187,6 +188,8 @@ class Hub:
                 return
             self.stop_job()
         elif phase == "draft":
+            if now - getattr(self, "draft_at", 0) < self.config["ignore_taps_after_draft_s"]:
+                return                                       # still reading the draft back
             self.send_invoice()
         elif phase == "paid":
             self.reset()
@@ -241,6 +244,7 @@ class Hub:
                                  active_seconds=shot["active_seconds"], note=self.note)
         self.state["services"]["brain"] = draft["provider"]
         self.set(phase="draft", draft=draft)
+        self.draft_at = time.time()
         self.led("#ff9900", "breathe", "draft ready: double-tap to send", period=1500)
         self.say(brain.read_back(draft) + " Double tap to send it.")
 
@@ -393,7 +397,7 @@ def demo_script(hub):
     hub.inbox.put(("page-tap", None))
     if not wait_for("draft", 60):
         return
-    time.sleep(1.5)
+    time.sleep(hub.config["ignore_taps_after_draft_s"] + 0.5)
     hub.inbox.put(("page-tap", None))
     if not wait_for("sent", 30):
         return
