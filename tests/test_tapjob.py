@@ -20,6 +20,7 @@ sys.path.insert(0, str(ROOT))
 
 import billing  # noqa: E402
 import brain    # noqa: E402
+import keys     # noqa: E402
 
 CONFIG = {"labor_rate": 95.0, "currency": "usd", "customer_email": "", "business_name": "Test"}
 WORDS = ("Job for Mr. Wang, kitchen sink is leaking under the cabinet. Replaced the supply hose, 18 dollars. "
@@ -143,6 +144,27 @@ class StripeBilling(unittest.TestCase):
         self.assertEqual([int(i["amount"]) for i in items], [1800, 2500, 14250])
         self.assertTrue(all(i["invoice"] == "in_1" and i["currency"] == "usd" for i in items))
         self.assertEqual(calls[1][2]["collection_method"], "send_invoice")
+
+
+class Keys(unittest.TestCase):
+    def test_saved_in_env_file_and_live_keys_refused(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder, mock.patch.dict(os.environ, {}, clear=False):
+            (Path(folder) / "env.example").write_text("# comment\nDEEPGRAM_API_KEY=\nSTRIPE_SECRET_KEY=\n")
+            keys.save("DEEPGRAM_API_KEY", "abcdef0123456789", folder)
+            keys.save("STRIPE_SECRET_KEY", "sk_test_abc12345", folder)
+            keys.save("DEEPGRAM_API_KEY", "fedcba9876543210", folder)          # replaced, not doubled
+            text = (Path(folder) / ".env").read_text()
+            self.assertEqual(text.count("DEEPGRAM_API_KEY="), 1)
+            self.assertIn("DEEPGRAM_API_KEY=fedcba9876543210", text)
+            self.assertIn("STRIPE_SECRET_KEY=sk_test_abc12345", text)
+            self.assertEqual(os.stat(Path(folder) / ".env").st_mode & 0o777, 0o600)
+            self.assertEqual(os.environ["DEEPGRAM_API_KEY"], "fedcba9876543210")
+            with self.assertRaises(ValueError):
+                keys.save("STRIPE_SECRET_KEY", "sk_live_abc12345", folder)
+            with self.assertRaises(ValueError):
+                keys.save("OTHER", "abcdef0123456789", folder)
+            self.assertIsNotNone(keys.check("GEMINI_API_KEY", "has a space in it"))
 
 
 class WholeLoop(unittest.TestCase):

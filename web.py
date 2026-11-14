@@ -4,6 +4,8 @@ Only this computer can open it (it listens on 127.0.0.1). Standard library only.
 import html
 import json
 import threading
+
+import keys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -58,6 +60,17 @@ def start(hub, port):
                 if body.get("type") not in ACTIONS:
                     return self.reply(400, "Unknown action.")
                 hub.inbox.put((body["type"], body.get("value")))
+                self.reply(200, "{}", "application/json")
+            elif path == "/keys":
+                try:
+                    body = json.loads(raw.decode("utf-8") or "{}")
+                except ValueError:
+                    return self.reply(400, "Not JSON.")
+                name, value = body.get("name"), str(body.get("value") or "").strip()
+                problem = keys.check(name, value)
+                if problem:
+                    return self.reply(400, json.dumps({"problem": problem}), "application/json")
+                hub.inbox.put(("key", (name, value)))
                 self.reply(200, "{}", "application/json")
             elif path.startswith("/pay/"):
                 number = path[5:]

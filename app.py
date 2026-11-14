@@ -38,6 +38,7 @@ from vexo_open.transports.sim import SimTransport        # noqa: E402
 
 import billing                                           # noqa: E402
 import brain                                             # noqa: E402
+import keys                                              # noqa: E402
 import voice                                             # noqa: E402
 import web                                               # noqa: E402
 
@@ -121,6 +122,7 @@ class Hub:
     def snapshot(self):
         with self.lock:
             shot = json.loads(json.dumps(self.state))
+        shot["keys"] = keys.status()                         # saved or missing, never the values
         if shot["phase"] == "recording" and shot["started"]:
             shot["elapsed"] = round(time.time() - shot["started"])
         elif shot["started"] and shot["stopped"]:
@@ -323,6 +325,24 @@ class Hub:
             self.next_poll = 0
         elif kind == "speech-problem":
             self.note("Speech engine: %s" % value)
+        elif kind == "key" and value:
+            self.use_key(*value)
+
+    def use_key(self, name, value):
+        """A key typed on the page: into .env, and in use at once (no restart)."""
+        try:
+            keys.save(name, value)
+        except (ValueError, OSError) as problem:
+            self.note("Key not saved: %s" % problem)
+            return
+        if name == "STRIPE_SECRET_KEY" and self.state["phase"] in ("idle", "recording", "thinking", "draft"):
+            try:
+                self.biller = billing.create(self.args.port)
+            except SystemExit as problem:
+                self.note(str(problem))
+        self.state["services"]["brain"] = brain.provider()
+        self.state["services"]["billing"] = self.biller.label
+        self.note("Key saved in .env: %s" % name)
 
     def run(self, seconds=None):
         band = self.band

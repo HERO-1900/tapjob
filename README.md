@@ -93,7 +93,7 @@ python3 app.py 42                    # double-tap the band first: its light blin
 Close the kit's dashboard tab first: the band takes one Bluetooth connection at a time.
 
 On a Mac you can skip the commands: double-click `start.command` (it sets up Python, gets the kit,
-reads `band_number` from `config.json`, asks for any key that is still missing and saves it in `.env`, and starts), or `demo.command` for the pretend band.
+reads `band_number` from `config.json`, and starts; missing keys can be typed into the Keys box on the page, which saves them in `.env`), or `demo.command` for the pretend band.
 
 **Paying the test invoice:** on the Stripe page use card `4242 4242 4242 4242`, any future
 date, any CVC.
@@ -156,6 +156,7 @@ near you. Saved job records (`jobs/`) stay on this computer and are not committe
 | `billing.py` | Stripe test-mode invoice, or the demo pay page |
 | `voice.py` | Speaks the draft |
 | `web.py`, `static/index.html` | The live page |
+| `keys.py` | Saves keys typed on the page into `.env` |
 | `tests/` | Offline tests |
 | `AGENTS.md` | Notes for AI coding agents working on this repo |
 

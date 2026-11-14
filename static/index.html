@@ -43,6 +43,10 @@
 <body>
 <header><h1>TapJob</h1><span id="who"></span></header>
 <main>
+  <section class="card" id="keycard" style="grid-column:1/-1;display:none">
+    <h2>Keys <small style="text-transform:none;letter-spacing:0">saved in .env on this computer, never shown again</small></h2>
+    <div id="keys" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px"></div>
+  </section>
   <section class="card">
     <h2>Band</h2>
     <div id="phase">…</div>
@@ -96,8 +100,36 @@ $('send').onclick = () => post('send');
 $('discard').onclick = () => post('discard');
 $('add').onclick = () => { const t = $('typed').value.trim(); if (t) { post('say', t); $('typed').value = ''; } };
 
+const KEYS = { DEEPGRAM_API_KEY: 'Deepgram (speech)', GEMINI_API_KEY: 'Gemini (words to invoice)', STRIPE_SECRET_KEY: 'Stripe test key (sk_test_…)' };
+function drawKeys(have) {
+  const box = $('keys');
+  if (!box.children.length) {
+    for (const name of Object.keys(KEYS)) {
+      const row = el('div'); row.id = 'key-' + name;
+      const label = el('div', KEYS[name]); label.style.fontWeight = '600';
+      const status = el('small', ''); status.className = 'status';
+      const input = el('input'); input.type = 'password'; input.placeholder = name; input.autocomplete = 'off';
+      input.id = 'input-' + name; input.style = 'width:100%;margin:6px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit';
+      const save = el('button', 'Save'); save.id = 'save-' + name;
+      save.onclick = async () => {
+        const value = input.value.trim(); if (!value) return;
+        const r = await fetch('/keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, value }) });
+        if (r.ok) { input.value = ''; status.textContent = 'saving…'; } else { status.textContent = (await r.json()).problem; status.style.color = 'var(--warn)'; }
+      };
+      row.append(label, status, input, save); box.append(row);
+    }
+  }
+  let missing = 0;
+  for (const name of Object.keys(KEYS)) {
+    const status = document.querySelector('#key-' + name + ' .status');
+    if (have[name]) { status.textContent = '✓ saved'; status.style.color = 'var(--go)'; }
+    else { missing++; if (!status.textContent || status.textContent === '✓ saved') { status.textContent = 'missing: a stand-in is used'; status.style.color = 'var(--soft)'; } }
+  }
+  $('keycard').style.display = 'block';
+}
 let shownLink = '';
 function draw(s) {
+  if (s.keys) drawKeys(s.keys);
   const [title, hint] = PHASES[s.phase] || [s.phase, ''];
   $('phase').textContent = title; $('hint').textContent = hint;
   $('who').textContent = s.business + ' · ' + s.band + ' (' + s.link + ')';
