@@ -17,11 +17,16 @@ fi
 for name in DEEPGRAM_API_KEY GEMINI_API_KEY STRIPE_SECRET_KEY; do
   grep -Eq "^${name}=.+" .env || echo "Not set yet: $name (add it on the page that opens, under Keys)"
 done
-(sleep 4; open "http://127.0.0.1:8765") &
+# The page exists only once the band is connected, so open it then (not before).
+(for _ in $(seq 1 400); do
+  if nc -z 127.0.0.1 8765 >/dev/null 2>&1; then open "http://127.0.0.1:8765"; break; fi
+  sleep 1
+done) &
 echo
 echo "先关掉 Vexo 的 dashboard 网页（如果开着）。程序会反复找手环，最多 4 分钟，不用着急。"
 echo "如果 macOS 弹窗问「终端想要使用蓝牙」，点「允许」，然后重新双击 start.command。"
 echo "手环没反应就用 USB-C 线把它接到这台电脑上。"
+echo "手环一连上，TapJob 的网页会自动在浏览器里打开（没连上之前不会打开，这是正常的）。"
 echo
 .venv/bin/python app.py "$@"
 echo
