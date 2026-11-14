@@ -1,33 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-look="carbon">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TapJob</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  /* The page is the yellow customer copy of a carbonless invoice book; the ticket is the white top copy. */
+  /* Look "carbon": the page is the yellow customer copy of a carbonless invoice book, the ticket is the white top copy. */
   :root {
-    --canary:#f4dc62; --canary-deep:#e6c93f; --ink:#18245c; --form:#3552b8; --rule:#b9c6ec;
-    --paper:#fefdf7; --pen:#14171f; --serial:#c8281f; --paid:#1f8a45;
+    --page:#f4dc62; --page-deep:#e6c93f; --ink:#18245c; --on-ink:#f4dc62; --form:#3552b8; --rule:#b9c6ec;
+    --paper:#fefdf7; --pen:#14171f; --serial:#c8281f; --paid:#1f8a45; --edge:1.5px; --lift:none; --round:3px;
     --print:"Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+    --display:var(--print); --display-weight:700; --display-gap:-.01em;
     --text:"Barlow", "Helvetica Neue", Arial, sans-serif;
     --hand:"Kalam", "Bradley Hand", "Noteworthy", "Marker Felt", cursive;
+    --ground:none;
+  }
+  /* Look "comic": a hero comic page. Thick outlines, hard shadows, dots. */
+  [data-look="comic"] {
+    --page:#c7ebff; --page-deep:#16163a; --ink:#16163a; --on-ink:#ffffff; --form:#16163a; --rule:#c5cfe6;
+    --paper:#ffffff; --pen:#16163a; --serial:#e5262b; --paid:#0f9d58; --edge:3px; --lift:4px 4px 0 var(--ink); --round:10px;
+    --display:"Bangers", "Barlow Condensed", "Arial Narrow", sans-serif; --display-weight:400; --display-gap:.03em;
+    --ground:radial-gradient(circle, rgba(22,22,58,.13) 1.6px, transparent 1.8px) 0 0/15px 15px;
   }
   * { box-sizing:border-box; }
   html, body { height:100%; }
-  body { margin:0; display:grid; grid-template-rows:auto auto auto minmax(0,1fr) auto; font:17px/1.4 var(--text); color:var(--ink); background:var(--canary); }
+  body { margin:0; display:grid; grid-template-rows:auto auto auto minmax(0,1fr) auto; font:17px/1.4 var(--text); color:var(--ink); background:var(--ground), var(--page); background-color:var(--page); }
   button, input, textarea { font:inherit; color:inherit; }
   :focus-visible { outline:3px solid var(--ink); outline-offset:2px; }
 
   .top { display:flex; align-items:baseline; gap:16px; padding:16px 34px 6px; }
-  .brand { margin:0; font:700 38px/1 var(--print); letter-spacing:-.01em; }
+  .brand { margin:0; font:var(--display-weight) 38px/1 var(--display); letter-spacing:var(--display-gap); }
   .shop { font:500 21px/1 var(--print); }
-  .link { margin-left:auto; display:flex; align-items:center; gap:8px; font:500 18px/1 var(--print); }
+  .link { display:flex; align-items:center; gap:8px; font:500 18px/1 var(--print); }
   .link b { width:10px; height:10px; border-radius:50%; background:var(--paid); }
   .link.off b { background:var(--serial); }
+  .push { margin-left:auto; }
 
   .setup { margin:4px 34px 0; }
   .setup summary { cursor:pointer; width:max-content; font:500 16px/1.2 var(--print); padding:3px 0; }
@@ -37,52 +47,63 @@
   .key small.ok { color:var(--paid); font-weight:600; }
   .key small.bad { color:var(--serial); font-weight:600; }
   .key div { display:flex; gap:6px; }
-  .key input { flex:1; min-width:0; padding:7px 10px; border:1.5px solid var(--ink); border-radius:3px; background:var(--paper); }
+  .key input { flex:1; min-width:0; padding:7px 10px; border:var(--edge) solid var(--ink); border-radius:var(--round); background:var(--paper); color:var(--pen); }
 
-  main { display:grid; grid-template-columns:minmax(240px,290px) minmax(0,1fr) minmax(380px,470px); gap:34px; padding:14px 34px 18px; min-height:0; }
-  h2 { margin:0 0 8px; font:600 20px/1.1 var(--print); }
-
-  /* the band */
-  .band { display:flex; flex-direction:column; min-height:0; }
-  .wrist { flex:none; width:225px; height:94px; display:block; margin:0 0 12px; }
-  #led { fill:#fff; color:#fff; filter:drop-shadow(0 0 7px currentColor) drop-shadow(0 0 14px currentColor); }
-  #led.blink { animation:blink .9s steps(2) infinite; }
-  #led.breathe { animation:breathe 2.6s ease-in-out infinite; }
-  @keyframes blink { 50% { opacity:.12; } }
-  @keyframes breathe { 50% { opacity:.3; } }
-  #phase { font:700 46px/1 var(--print); letter-spacing:-.01em; margin:2px 0 6px; }
-  #hint { min-height:3em; }
-  #clock { font:600 30px/1 var(--print); font-variant-numeric:tabular-nums; margin:6px 0 2px; min-height:30px; }
-  #lednote { font-size:14px; opacity:.8; }
   .steps { list-style:none; display:flex; margin:10px 34px 0; padding:0; counter-reset:step; font:500 18px/1.2 var(--print); }
-  .steps li { counter-increment:step; flex:1 1 auto; display:flex; align-items:center; gap:8px; white-space:nowrap; color:rgba(24,36,92,.55); }
+  .steps li { counter-increment:step; flex:1 1 auto; display:flex; align-items:center; gap:8px; white-space:nowrap; opacity:.55; }
   .steps li:last-child { flex:0 0 auto; }
   .steps li::before { content:counter(step); flex:none; display:grid; place-items:center; width:24px; height:24px; border:1.5px solid currentColor; border-radius:50%; font-size:14px; }
   .steps li:not(:last-child)::after { content:""; flex:1; min-width:14px; height:1.5px; margin:0 12px 0 4px; background:currentColor; opacity:.5; }
-  .steps li.done { color:rgba(24,36,92,.8); }
-  .steps li.done::before { content:"✓"; background:var(--ink); border-color:var(--ink); color:var(--canary); }
-  .steps li.now { color:var(--ink); font-weight:700; }
-  .steps li.now::before { background:var(--ink); border-color:var(--ink); color:var(--canary); }
-  .acts { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; padding-top:14px; }
-  button { cursor:pointer; padding:9px 14px; border:1.5px solid var(--ink); border-radius:3px; background:transparent; font:600 18px/1 var(--print); }
-  button.solid { background:var(--ink); color:var(--canary); }
-  button.pay { background:var(--paid); border-color:var(--paid); color:#fff; }
+  .steps li.done { opacity:.8; }
+  .steps li.done::before { content:"✓"; background:var(--ink); border-color:var(--ink); color:var(--on-ink); }
+  .steps li.now { opacity:1; font-weight:700; }
+  .steps li.now::before { background:var(--ink); border-color:var(--ink); color:var(--on-ink); }
+
+  main { display:grid; grid-template-columns:minmax(250px,300px) minmax(0,1fr) minmax(380px,470px); gap:34px; padding:14px 34px 18px; min-height:0; }
+  h2 { margin:0 0 8px; font:600 20px/1.1 var(--print); }
+  button { cursor:pointer; padding:9px 14px; border:var(--edge) solid var(--ink); border-radius:var(--round); background:transparent; font:600 18px/1 var(--print); box-shadow:var(--lift); }
+  [data-look="comic"] button { background:var(--paper); }
+  button.solid, [data-look="comic"] button.solid { background:var(--ink); color:var(--on-ink); }
+  button.pay, [data-look="comic"] button.pay { background:var(--paid); border-color:var(--paid); color:#fff; }
+  [data-look="comic"] button.pay { border-color:var(--ink); }
+  button.small { padding:5px 10px; font-size:15px; }
   button:disabled { opacity:.3; cursor:default; }
+
+  /* the hero who wears the band */
+  .band { display:flex; flex-direction:column; min-height:0; }
+  .me { display:flex; align-items:flex-end; gap:12px; margin-bottom:10px; }
+  .me .art { flex:none; width:128px; height:147px; }
+  .me .who { min-width:0; padding-bottom:4px; }
+  .me strong { display:block; font:var(--display-weight) 27px/1 var(--display); letter-spacing:var(--display-gap); }
+  .me span { display:block; font:500 16px/1.2 var(--print); margin:4px 0 8px; }
+  .art svg { display:block; width:100%; height:100%; overflow:visible; }
+  .led { fill:#fff; color:#fff; filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 0 11px currentColor); }
+  .led.blink { animation:blink .9s steps(2) infinite; }
+  .led.breathe { animation:breathe 2.6s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity:.12; } }
+  @keyframes breathe { 50% { opacity:.3; } }
+  #phase { font:var(--display-weight) 44px/1 var(--display); letter-spacing:var(--display-gap); margin:2px 0 6px; }
+  #hint { min-height:3em; }
+  #clock { font:600 28px/1 var(--print); font-variant-numeric:tabular-nums; margin:6px 0 2px; min-height:28px; }
+  #lednote { font-size:14px; opacity:.8; }
+  .acts { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; padding-top:12px; }
 
   /* what the band heard */
   .heard { display:flex; flex-direction:column; min-height:0; }
   #words { flex:1; min-height:0; overflow:auto; font:500 27px/1.32 var(--text); }
   #words div { margin-bottom:.45em; }
   #words i { font-style:normal; opacity:.55; }
-  #words small { font-size:18px; font-weight:400; opacity:.75; }
+  #words small { display:block; font-size:18px; font-weight:400; opacity:.8; }
+  #words q { display:block; margin-top:8px; font:400 21px/1.35 var(--hand); opacity:.9; }
   .typing { margin-top:10px; font-size:15px; }
   .typing summary { cursor:pointer; width:max-content; }
-  .typing textarea { display:block; width:100%; min-height:64px; margin:8px 0; padding:8px 10px; border:1.5px solid var(--ink); border-radius:3px; background:var(--paper); }
+  .typing textarea { display:block; width:100%; min-height:64px; margin:8px 0; padding:8px 10px; border:var(--edge) solid var(--ink); border-radius:var(--round); background:var(--paper); color:var(--pen); }
 
   /* the ticket: the white top copy */
   .ticket { position:relative; display:flex; flex-direction:column; min-height:0; overflow:hidden; background:var(--paper); color:var(--pen);
-            padding:30px 26px 18px; border-radius:2px; box-shadow:0 1px 0 var(--canary-deep), 0 22px 34px -22px rgba(24,36,92,.7); }
-  .ticket::before { content:""; position:absolute; inset:0 0 auto 0; height:16px; background:radial-gradient(circle at 9px 8px, var(--canary) 3.2px, transparent 3.6px) 0 0/18px 16px repeat-x; }
+            padding:30px 26px 18px; border-radius:2px; box-shadow:0 1px 0 var(--page-deep), 0 22px 34px -22px rgba(24,36,92,.7); }
+  [data-look="comic"] .ticket { border:3px solid var(--ink); border-radius:12px; box-shadow:8px 8px 0 var(--ink); }
+  .ticket::before { content:""; position:absolute; inset:0 0 auto 0; height:16px; background:radial-gradient(circle at 9px 8px, var(--page) 3.2px, transparent 3.6px) 0 0/18px 16px repeat-x; }
   .thead { display:flex; align-items:baseline; justify-content:space-between; gap:12px; color:var(--form); border-bottom:2px solid var(--form); padding-bottom:6px; }
   .thead strong { font:700 25px/1 var(--print); }
   .serial { font:600 21px/1 var(--print); color:var(--serial); letter-spacing:.04em; white-space:nowrap; }
@@ -95,6 +116,7 @@
   #lines { flex:1 1 68px; min-height:34px; overflow:auto; background:repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px); }
   .line { display:flex; align-items:baseline; justify-content:space-between; gap:12px; min-height:34px; padding-top:5px; font:400 20px/1.2 var(--hand); }
   .line em { font:500 13px/1 var(--print); font-style:normal; color:var(--form); margin-left:8px; white-space:nowrap; }
+  .line em.list { color:var(--paid); font-weight:600; }
   .line em.miss { color:var(--serial); }
   .line b { font-weight:400; white-space:nowrap; font-variant-numeric:tabular-nums; }
   .blank { padding:8px 0; font:400 17px/1.35 var(--text); color:var(--form); }
@@ -117,18 +139,44 @@
   .hood summary { cursor:pointer; width:max-content; font:500 15px/1.2 var(--print); opacity:.8; }
   #log { max-height:120px; overflow:auto; white-space:pre-wrap; margin-top:6px; font-size:13px; line-height:1.5; }
 
+  /* choosing who wears the band: one card per job */
+  dialog { width:min(1120px, 94vw); max-height:92vh; padding:26px 30px 24px; border:var(--edge) solid var(--ink); border-radius:calc(var(--round) + 6px);
+           background:var(--ground), var(--page); background-color:var(--page); color:var(--ink); box-shadow:0 30px 80px rgba(10,14,40,.45); }
+  dialog::backdrop { background:rgba(10,14,40,.55); }
+  dialog h2 { font:var(--display-weight) 40px/1 var(--display); letter-spacing:var(--display-gap); margin:0 0 4px; }
+  dialog > p { margin:0 0 16px; font-size:18px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:18px; }
+  .card, [data-look="comic"] .card { display:flex; flex-direction:column; align-items:stretch; padding:0; text-align:left; overflow:hidden; background:var(--paper); color:var(--pen);
+          border:3px solid var(--ink); border-radius:14px; box-shadow:5px 5px 0 var(--ink); transition:transform .12s; }
+  .card:hover, .card:focus-visible { transform:translate(-2px,-2px); }
+  .card.on, [data-look="comic"] .card.on { box-shadow:5px 5px 0 var(--paid); border-color:var(--paid); }
+  .card .art { height:176px; padding:10px 0 0; border-bottom:3px solid var(--ink);
+               background:repeating-conic-gradient(from 0deg at 50% 64%, color-mix(in srgb, var(--cape) 42%, #fff) 0 12deg, color-mix(in srgb, var(--cape) 20%, #fff) 12deg 24deg); }
+  .card .art svg { width:auto; margin:0 auto; }
+  .card strong { padding:10px 14px 0; font:400 28px/1 "Bangers", var(--print); letter-spacing:.03em; }
+  .card span { padding:3px 14px 0; font:600 16px/1.2 var(--print); color:var(--form); }
+  .card p { margin:0; padding:6px 14px 0; font:400 15px/1.3 var(--text); }
+  .card small { margin-top:auto; padding:8px 14px 12px; font:500 14px/1.2 var(--print); color:var(--form); }
+  .invent { margin-top:20px; }
+  .invent label { display:block; font:600 20px/1.2 var(--print); margin-bottom:6px; }
+  .invent div { display:flex; gap:8px; }
+  .invent input { flex:1; min-width:0; padding:10px 12px; font-size:19px; border:var(--edge) solid var(--ink); border-radius:var(--round); background:var(--paper); color:var(--pen); }
+  .invent small { display:block; min-height:1.5em; margin-top:6px; font-size:15px; }
+  .shut { position:absolute; top:18px; right:22px; }
+
   @media (max-width: 980px) {
     html, body { height:auto; } body { display:block; }
     main { grid-template-columns:1fr; } .keys { grid-template-columns:1fr; } .acts { margin-top:14px; } .steps { flex-wrap:wrap; gap:6px 0; }
     #words { min-height:120px; } .ticket { overflow:visible; }
   }
-  @media (prefers-reduced-motion: reduce) { #led.blink, #led.breathe, #stamp.on { animation:none; } }
+  @media (prefers-reduced-motion: reduce) { .led.blink, .led.breathe, #stamp.on { animation:none; } .card { transition:none; } }
 </style>
 </head>
 <body>
 <header class="top">
   <h1 class="brand">TapJob</h1>
   <span class="shop" id="shop"></span>
+  <button class="small push" id="look" title="Switch the look of this page">Look: carbon copy</button>
   <span class="link off" id="link"><b></b><span id="linktext">Looking for the band</span></span>
 </header>
 
@@ -146,12 +194,11 @@
 </ol>
 
 <main>
-  <section class="band" aria-label="The band">
-    <svg class="wrist" viewBox="0 0 250 104" role="img" aria-label="The wrist band and its light">
-      <rect x="0" y="30" width="250" height="44" rx="22" fill="#18245c"/>
-      <rect x="86" y="12" width="78" height="80" rx="16" fill="#0f173d" stroke="#3552b8" stroke-width="2"/>
-      <circle id="led" cx="125" cy="52" r="9"/>
-    </svg>
+  <section class="band" aria-label="Who wears the band">
+    <div class="me">
+      <div class="art" id="meart"></div>
+      <div class="who"><strong id="mehero"></strong><span id="metitle"></span><button class="small" id="change">Change job</button></div>
+    </div>
     <div id="phase">Starting</div>
     <div id="hint"></div>
     <div id="clock"></div>
@@ -168,7 +215,7 @@
     <div id="words" aria-live="polite"></div>
     <details class="typing">
       <summary>No microphone? Type the words instead</summary>
-      <textarea id="typed" placeholder="Type what the technician says while a job is running."></textarea>
+      <textarea id="typed" placeholder="Type what the worker says while a job is running."></textarea>
       <button id="add" disabled>Add words</button>
     </details>
   </section>
@@ -177,7 +224,7 @@
     <div class="thead"><strong id="biz">Invoice</strong><span class="serial" id="serial"></span></div>
     <div class="field"><span>Customer</span><output id="cust"></output></div>
     <div class="field"><span>Job</span><output id="job"></output></div>
-    <div class="cols"><span>Parts and labor</span><span>Amount</span></div>
+    <div class="cols"><span id="colname">Parts and labor</span><span>Amount</span></div>
     <div id="lines"></div>
     <div class="sum"><span>Total</span><output id="total"></output></div>
     <div class="notes" id="notes"></div>
@@ -193,6 +240,18 @@
   <div id="log"></div>
 </details>
 
+<dialog id="jobs" aria-labelledby="jobstitle">
+  <button class="small shut" id="shut">Close</button>
+  <h2 id="jobstitle">Every job has a hero</h2>
+  <p>Pick who is wearing the band today. The card brings its own price list.</p>
+  <div class="cards" id="cards"></div>
+  <form class="invent" id="invent">
+    <label for="sentence">Not here? Describe your job in one sentence</label>
+    <div><input id="sentence" maxlength="200" placeholder="I fix rockets on the launch pad" autocomplete="off"><button class="solid" id="make">Make my hero</button></div>
+    <small id="making"></small>
+  </form>
+</dialog>
+
 <script>
 const $ = (id) => document.getElementById(id);
 const PHASES = {
@@ -206,15 +265,70 @@ const PHASES = {
 };
 const LINKS = { serial: 'on the USB cable', ble: 'on Bluetooth', sim: 'pretend band' };
 const KEYS = { DEEPGRAM_API_KEY: 'Deepgram, for speech', GEMINI_API_KEY: 'Gemini, for reading the words', STRIPE_SECRET_KEY: 'Stripe test key (sk_test_…)' };
+const LOOKS = { carbon: 'carbon copy', comic: 'comic' };
 const money = (n) => '$' + Number(n).toFixed(2);
 const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
 const post = (type, value) => fetch('/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, value }) });
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
+const hex = (c, fallback) => /^#[0-9a-f]{6}$/i.test(c || '') ? c : fallback;
 
+/* ---- the hero: an original figure drawn here, wearing the band on the left wrist ---- */
+const GEAR = {
+  cap: (suit, cape) => `<path d="M66 36 Q100 0 134 36 Z" fill="${cape}"/><path d="M116 30 h34 q8 0 8 8 h-42 z" fill="${cape}"/>`,
+  hardhat: () => `<path d="M64 36 Q100 -8 136 36 Z" fill="#ffc61a"/><rect x="56" y="31" width="88" height="10" rx="5" fill="#ffc61a"/><rect x="96" y="2" width="8" height="30" rx="4" fill="#e0a800"/>`,
+  headset: (suit, cape, dark) => `<path d="M62 48 Q100 -12 138 48" fill="none" stroke="${dark}" stroke-width="7" stroke-linecap="round"/><rect x="54" y="40" width="15" height="26" rx="7" fill="${dark}"/><rect x="131" y="40" width="15" height="26" rx="7" fill="${dark}"/><path d="M61 64 Q60 84 84 80" fill="none" stroke="${dark}" stroke-width="4" stroke-linecap="round"/><circle cx="87" cy="80" r="5.5" fill="${cape}"/>`,
+  headband: (suit, cape) => `<rect x="66" y="27" width="68" height="11" rx="5.5" fill="${cape}"/><path d="M132 31 l20 -9 l-5 13 l11 7 z" fill="${cape}"/>`,
+  goggles: (suit, cape, dark) => `<rect x="68" y="20" width="64" height="15" rx="7.5" fill="${dark}"/><circle cx="86" cy="27" r="9.5" fill="#bfe6ff" stroke="${dark}" stroke-width="4"/><circle cx="114" cy="27" r="9.5" fill="#bfe6ff" stroke="${dark}" stroke-width="4"/>`,
+  none: () => '',
+};
+function heroSVG(role, withLed) {
+  const suit = hex(role.suit, '#1f4fd8'), cape = hex(role.cape, '#e23b2e'), dark = '#14171f';
+  const gear = (GEAR[role.gear] || GEAR.none)(suit, cape, dark);
+  return `<svg viewBox="0 0 200 230" role="img" aria-label="${esc(role.hero || 'Hero')}">
+    <ellipse cx="100" cy="219" rx="54" ry="8" fill="rgba(10,14,40,.18)"/>
+    <path d="M64 80 C28 122 26 172 38 206 L100 190 L162 206 C174 172 172 122 136 80 Z" fill="${cape}"/>
+    <rect x="72" y="150" width="25" height="54" rx="11" fill="${suit}"/><rect x="103" y="150" width="25" height="54" rx="11" fill="${suit}"/>
+    <rect x="65" y="194" width="34" height="20" rx="9" fill="${dark}"/><rect x="101" y="194" width="34" height="20" rx="9" fill="${dark}"/>
+    <path d="M72 94 L44 122 L66 146" fill="none" stroke="${suit}" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M128 94 L156 122 L134 146" fill="none" stroke="${suit}" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="67" cy="147" r="11" fill="${dark}"/><circle cx="133" cy="147" r="11" fill="${dark}"/>
+    <path d="M46 126 L60 140" stroke="${dark}" stroke-width="21" stroke-linecap="round"/>
+    ${withLed ? '<circle class="led" cx="53" cy="133" r="5.5"/>' : `<circle cx="53" cy="133" r="5" fill="#fff"/>`}
+    <path d="M63 86 Q100 72 137 86 L131 158 Q100 167 69 158 Z" fill="${suit}"/>
+    <rect x="68" y="141" width="64" height="12" rx="4" fill="${cape}"/>
+    <circle cx="100" cy="113" r="21" fill="#fff" stroke="${dark}" stroke-width="3"/>
+    <text x="100" y="122" text-anchor="middle" font-size="25">${esc(role.emoji || '⭐')}</text>
+    <rect x="67" y="18" width="66" height="62" rx="27" fill="${suit}"/>
+    <rect x="75" y="39" width="50" height="23" rx="11.5" fill="${dark}"/>
+    <circle cx="90" cy="50.5" r="4.8" fill="#fff"/><circle cx="110" cy="50.5" r="4.8" fill="#fff"/>
+    ${gear}
+  </svg>`;
+}
+
+/* ---- buttons ---- */
 $('tap').onclick = () => post('page-tap');
 $('send').onclick = () => post('send');
 $('discard').onclick = () => post('discard');
 $('add').onclick = () => { const t = $('typed').value.trim(); if (t) { post('say', t); $('typed').value = ''; } };
+$('change').onclick = () => $('jobs').showModal();
+$('shut').onclick = () => $('jobs').close();
+function setLook(name) {
+  if (!LOOKS[name]) name = 'carbon';
+  document.documentElement.dataset.look = name; $('look').textContent = 'Look: ' + LOOKS[name];
+  try { localStorage.setItem('tapjob-look', name); } catch (e) {}
+}
+$('look').onclick = () => { const names = Object.keys(LOOKS); setLook(names[(names.indexOf(document.documentElement.dataset.look) + 1) % names.length]); };
+try { setLook(localStorage.getItem('tapjob-look') || 'carbon'); } catch (e) { setLook('carbon'); }
 
+let waitingForCard = null, shownRole = '', shownRoles = 0;
+$('invent').onsubmit = (event) => {
+  event.preventDefault();
+  const sentence = $('sentence').value.trim(); if (!sentence) return;
+  waitingForCard = shownRoles; $('making').textContent = 'Making your hero…'; $('make').disabled = true;
+  post('role', { sentence });
+};
+
+/* ---- keys ---- */
 let keysKnown = null;
 function drawKeys(have) {
   const box = $('keys');
@@ -243,15 +357,48 @@ function drawKeys(have) {
   }
   $('setupsum').textContent = missing ? 'Keys: ' + missing + ' of 3 still to paste' : 'Keys: all three saved';
   const known = missing === 0;
-  if (keysKnown === null) $('setup').open = !known;          // first look: open only if something is missing
-  else if (known && !keysKnown) $('setup').open = false;     // the last key just went in
+  if (keysKnown === null) $('setup').open = !known;
+  else if (known && !keysKnown) $('setup').open = false;
   keysKnown = known;
 }
 
+/* ---- who wears the band ---- */
+function drawRole(s) {
+  const role = s.role; if (!role) return;
+  const stamp = JSON.stringify(role);
+  if (stamp !== shownRole) {
+    shownRole = stamp;
+    $('meart').innerHTML = heroSVG(role, true);
+    $('mehero').textContent = role.hero; $('metitle').textContent = role.title;
+  }
+  const all = s.roles || [];
+  const listStamp = all.length + '|' + role.id;
+  if (listStamp !== $('cards').dataset.stamp) {
+    $('cards').dataset.stamp = listStamp; $('cards').replaceChildren();
+    for (const r of all) {
+      const card = el('button', null, 'card' + (r.id === role.id ? ' on' : '')); card.type = 'button';
+      card.style.setProperty('--cape', hex(r.cape, '#e23b2e'));
+      const art = el('div', null, 'art'); art.innerHTML = heroSVG(r, false);
+      const prices = (r.price_list || []).length;
+      card.append(art, el('strong', r.hero), el('span', r.title), el('p', r.power),
+        el('small', prices + (prices === 1 ? ' price' : ' prices') + ' on the list' + (r.bills_labor ? ', bills ' + money(r.labor_rate) + ' an hour' : '')));
+      card.onclick = () => { post('role', { id: r.id }); $('jobs').close(); };
+      $('cards').append(card);
+    }
+  }
+  if (waitingForCard !== null && !s.making_role && all.length > waitingForCard) {       // the new card arrived
+    waitingForCard = null; $('making').textContent = ''; $('make').disabled = false; $('sentence').value = ''; $('jobs').close();
+  } else if (waitingForCard !== null && s.making_role) { $('making').textContent = 'Making your hero…'; }
+  shownRoles = all.length;
+  $('change').disabled = s.phase !== 'idle';
+}
+
+/* ---- the ticket ---- */
 let shownLink = '';
 function drawTicket(s) {
-  const d = s.draft, lines = $('lines');
+  const d = s.draft, lines = $('lines'), role = s.role || { bills_labor: true };
   $('biz').textContent = s.business || 'Invoice';
+  $('colname').textContent = role.bills_labor ? 'Parts and labor' : 'Items';
   const number = (String(s.band || '').match(/(\d+)\s*$/) || [, '00'])[1];
   const at = s.started ? new Date(s.started * 1000) : null;
   $('serial').textContent = 'No. ' + number + '-' + (at ? String(at.getHours()).padStart(2, '0') + String(at.getMinutes()).padStart(2, '0') : '····');
@@ -259,12 +406,14 @@ function drawTicket(s) {
   if (!d) {
     $('cust').textContent = ''; $('job').textContent = ''; $('total').textContent = ''; $('foot').textContent = '';
     lines.append(el('div', s.phase === 'recording' ? 'The ticket fills in when you double-tap to stop.'
-      : s.phase === 'thinking' ? 'Writing…' : 'Blank ticket. Double-tap the band, say what you did and what it cost, then double-tap again.', 'blank'));
+      : s.phase === 'thinking' ? 'Writing…' : 'Blank ticket. Double-tap the band, say what you did or what was ordered, then double-tap again.', 'blank'));
   } else {
     $('cust').textContent = d.customer || ''; $('job').textContent = d.summary || '';
+    let fromList = 0;
     for (const item of d.items || []) {
       const row = el('div', null, 'line'), name = el('span', item.description + (item.quantity !== 1 ? ' × ' + item.quantity : ''));
       if (item.unit_price == null) name.append(el('em', 'no price said', 'miss'));
+      else if (item.source === 'price list') { fromList++; name.append(el('em', 'price list', 'list')); }
       row.append(name, el('b', money(item.amount))); lines.append(row);
     }
     if (d.labor) {
@@ -273,8 +422,11 @@ function drawTicket(s) {
     }
     $('total').textContent = money(d.total);
     for (const w of d.warnings || []) $('notes').append(el('p', w));
-    const e = d.evidence || {};
-    $('foot').textContent = 'The band timed ' + (e.on_site_minutes ?? 0) + ' min on site, ' + (e.hands_working_minutes ?? 0) + ' of them with hands working. Words read by ' + (d.provider || 'TapJob') + '.';
+    const e = d.evidence || {}, foot = [];
+    if (d.labor) foot.push('The band timed ' + (e.on_site_minutes ?? 0) + ' min on site, ' + (e.hands_working_minutes ?? 0) + ' of them with hands working.');
+    if (fromList) foot.push('Prices marked price list come from the ' + (d.business || s.business || 'shop') + ' price list, not from what was said.');
+    foot.push('Words read by ' + (d.provider || 'TapJob') + '.');
+    $('foot').textContent = foot.join(' ');
   }
   const inv = s.invoice;
   $('pay').style.display = inv && !inv.paid ? 'flex' : 'none';
@@ -290,13 +442,16 @@ function drawTicket(s) {
 
 function draw(s) {
   if (s.keys) drawKeys(s.keys);
+  drawRole(s);
   const [title, hint, step] = PHASES[s.phase] || [s.phase, '', 0];
   $('phase').textContent = title; $('hint').textContent = hint;
   $('shop').textContent = s.business || '';
   $('link').className = 'link'; $('linktext').textContent = (s.band || 'Band') + ' ' + (LINKS[s.link] || s.link || '');
-  const led = $('led'), light = s.led || {};
-  led.style.fill = light.color || '#fff'; led.style.color = light.color || '#fff';
-  led.setAttribute('class', light.pattern === 'blink' || light.pattern === 'flash' ? 'blink' : light.pattern === 'breathe' ? 'breathe' : '');
+  const led = document.querySelector('#meart .led'), light = s.led || {};
+  if (led) {
+    led.style.fill = light.color || '#fff'; led.style.color = light.color || '#fff';
+    led.setAttribute('class', 'led' + (light.pattern === 'blink' || light.pattern === 'flash' ? ' blink' : light.pattern === 'breathe' ? ' breathe' : ''));
+  }
   $('lednote').textContent = light.note ? 'Band light: ' + light.note : '';
   $('clock').textContent = s.elapsed != null ? Math.floor(s.elapsed / 60) + ':' + String(s.elapsed % 60).padStart(2, '0') + ' on the job' : '';
   [...$('steps').children].forEach((li, i) => { li.className = i < step ? 'done' : i === step ? 'now' : ''; });
@@ -307,7 +462,10 @@ function draw(s) {
   words.replaceChildren();
   for (const line of heard) words.append(el('div', line));
   if (s.interim) words.append(el('i', s.interim));
-  if (!heard.length && !s.interim) words.append(el('small', s.phase === 'recording' ? 'Listening…' : 'Words show up here while you talk.'));
+  if (!heard.length && !s.interim) {
+    words.append(el('small', s.phase === 'recording' ? 'Listening…' : 'Words show up here while you talk.'));
+    if (s.role && s.role.sample && (s.phase === 'idle' || s.phase === 'recording')) { words.append(el('small', 'Something to say:')); words.append(el('q', s.role.sample)); }
+  }
   words.scrollTop = words.scrollHeight;
 
   drawTicket(s);

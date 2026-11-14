@@ -15,6 +15,8 @@ import ssl
 import urllib.error
 import urllib.request
 
+import roles
+
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
 GEMINI_MODEL = "gemini-4-hydrogen"          # the fast one; set GEMINI_MODEL to try another
 
@@ -77,10 +79,10 @@ def provider():
 
 # ---- the three ways to read the words ----------------------------------------------------
 
-def _gemini(words):
+def _gemini(words, instructions=None):
     model = os.environ.get("GEMINI_MODEL", GEMINI_MODEL)
     body = json.dumps({
-        "systemInstruction": {"parts": [{"text": INSTRUCTIONS}]},
+        "systemInstruction": {"parts": [{"text": instructions or INSTRUCTIONS}]},
         "contents": [{"role": "user", "parts": [{"text": words}]}],
         "generationConfig": {"responseMimeType": "application/json", "responseSchema": GEMINI_SCHEMA},
     }).encode("utf-8")
@@ -97,9 +99,9 @@ def _gemini(words):
     return _json(text)
 
 
-def _openai(words):
+def _openai(words, instructions=None):
     import ai                                    # the kit's helper (vexo-open-kit/examples/python/ai.py)
-    return ai.extract(words, OPENAI_SCHEMA, INSTRUCTIONS)
+    return ai.extract(words, OPENAI_SCHEMA, instructions or INSTRUCTIONS)
 
 
 def _json(text):
@@ -172,13 +174,30 @@ def _offline(words):
     return {"customer": customer, "summary": summary[:160], "parts": parts, "labor_hours": hours}
 
 
+def _listed(words, role, already):
+    """No model at hand: things on the price list that were named without a price."""
+    have = {roles._plain(part.get("description", "")) for part in already}
+    text, parts = " " + roles._plain(words) + " ", []
+    for name, _price in sorted((role or {}).get("price_list") or [], key=lambda row: -len(row[0])):
+        plain = roles._plain(name)
+        if not plain or plain in have:
+            continue
+        spot = re.search(r"(?:\b([a-z]+|\d+(?:\.\d+)?) )?%s\b" % re.escape(plain), text)
+        if not spot:
+            continue
+        quantity = _number(spot.group(1)) if spot.group(1) else None
+        parts.append({"description": name, "quantity": quantity or 1.0, "unit_price": None})
+        text = text[:spot.start()] + " " * (spot.end() - spot.start()) + text[spot.end():]    # not twice
+    return parts
+
+
 # ---- from the fields to money ------------------------------------------------------------
 
 def money(amount, currency="usd"):
     return ("$%.2f" % amount) if currency.lower() == "usd" else "%.2f %s" % (amount, currency.upper())
 
 
-def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print):
+def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print, role=None):
     """The fields a model found, checked and priced. Never raises: the worst case is the
     offline rules and a warning on the draft."""
     used, found = "offline rules", None
@@ -189,14 +208,16 @@ def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print):
         attempts.append(("OpenAI (kit helper)", _openai))
     for name, read in attempts:
         try:
-            found, used = read(words), name
+            found, used = read(words, INSTRUCTIONS + roles.prompt(role)), name
             break
         except Exception as problem:                 # try the next one, say why
             note("%s could not read the notes: %s" % (name, str(problem)[:200]))
     if not isinstance(found, dict):
         found, used = _offline(words), "offline rules"
+        found["parts"] = (found.get("parts") or []) + _listed(words, role, found.get("parts") or [])
 
-    rate = float(config["labor_rate"])
+    rate = float((role or {}).get("labor_rate") or config["labor_rate"])
+    bills_labor = role is None or bool(role.get("bills_labor"))
     warnings, items = [], []
     for part in found.get("parts") or []:
         description = str(part.get("description") or "").strip()[:200]
@@ -215,31 +236,40 @@ def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print):
             price = None
         if price is not None and (not math.isfinite(price) or price < 0 or price > 100000):
             price = None
+        source = "said" if price is not None else None
+        listed = roles.find_price(description, role)
+        if listed:                                   # the business's own price list, looked up in code
+            description = listed[0]
+            if price is None:
+                price, source = listed[1], "price list"
         if price is None:
             warnings.append("No price was said for: %s. It is on the invoice at $0, fix it before you send." % description)
         items.append({"description": description, "quantity": quantity, "unit_price": price,
-                      "amount": round(quantity * (price or 0), 2)})
+                      "amount": round(quantity * (price or 0), 2), "source": source})
 
-    hours = found.get("labor_hours")
-    try:
-        hours = None if hours is None else float(hours)
-    except (TypeError, ValueError):
-        hours = None
-    if hours is not None and (not math.isfinite(hours) or hours <= 0 or hours > 24):
-        hours = None
-    if hours is not None:
-        source = "said by the technician"
-    else:
-        hours = max(0.25, math.ceil(on_site_seconds / 900) / 4)      # quarter hours, at least one
-        source = "measured by the band"
-        warnings.append("No hours were said. The band timed %d minutes on site." % round(on_site_seconds / 60))
-    labor = {"hours": hours, "rate": rate, "amount": round(hours * rate, 2), "source": source}
+    labor = None
+    if bills_labor:
+        hours = found.get("labor_hours")
+        try:
+            hours = None if hours is None else float(hours)
+        except (TypeError, ValueError):
+            hours = None
+        if hours is not None and (not math.isfinite(hours) or hours <= 0 or hours > 24):
+            hours = None
+        if hours is not None:
+            source = "said by the technician"
+        else:
+            hours = max(0.25, math.ceil(on_site_seconds / 900) / 4)      # quarter hours, at least one
+            source = "measured by the band"
+            warnings.append("No hours were said. The band timed %d minutes on site." % round(on_site_seconds / 60))
+        labor = {"hours": hours, "rate": rate, "amount": round(hours * rate, 2), "source": source}
 
-    total = round(sum(item["amount"] for item in items) + labor["amount"], 2)
+    total = round(sum(item["amount"] for item in items) + (labor["amount"] if labor else 0), 2)
     return {
         "customer": (str(found.get("customer") or "").strip() or "Customer")[:80],
         "summary": (str(found.get("summary") or "").strip() or "Service call")[:300],
         "items": items, "labor": labor, "total": total, "warnings": warnings, "provider": used,
+        "role": (role or {}).get("title"), "business": (role or {}).get("business"),
         "evidence": {"on_site_minutes": round(on_site_seconds / 60, 1),
                      "hands_working_minutes": round(active_seconds / 60, 1)},
     }
@@ -247,12 +277,13 @@ def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print):
 
 def read_back(draft):
     """One breath, for the ear: the customer, each line, the total."""
-    lines = ["Invoice for %s." % draft["customer"]]
+    lines = ["%s for %s." % ("Invoice" if draft.get("labor") else "Order", draft["customer"])]
     for item in draft["items"]:
         lines.append("%s, %s." % (item["description"], _spoken(item["amount"]) if item["unit_price"] is not None
                                   else "no price"))
-    labor = draft["labor"]
-    lines.append("Labor %g hours, %s." % (labor["hours"], _spoken(labor["amount"])))
+    labor = draft.get("labor")
+    if labor:
+        lines.append("Labor %g hours, %s." % (labor["hours"], _spoken(labor["amount"])))
     lines.append("Total %s." % _spoken(draft["total"]))
     return " ".join(lines)
 

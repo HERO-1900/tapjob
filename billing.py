@@ -91,8 +91,10 @@ class StripeBilling:
         })
         lines = [("%s x%g" % (item["description"], item["quantity"]) if item["quantity"] != 1
                   else item["description"], item["amount"]) for item in draft["items"]]
-        labor = draft["labor"]
-        lines.append(("Labor %g h at %s/h (%s)" % (labor["hours"], labor["rate"], labor["source"]), labor["amount"]))
+        labor = draft.get("labor")
+        if labor:
+            lines.append(("Labor %g h at %s/h (%s)" % (labor["hours"], labor["rate"], labor["source"]),
+                          labor["amount"]))
         for description, amount in lines:
             self._call("POST", "invoiceitems", {
                 "customer": customer["id"], "invoice": invoice["id"], "currency": currency,

@@ -62,6 +62,26 @@ class OfflineBrain(unittest.TestCase):
         self.assertEqual(draft["labor"]["source"], "measured by the band")
         self.assertTrue(draft["warnings"])
 
+    def test_price_list_prices_an_order_and_bills_no_hours(self):
+        import roles
+        drive = roles.PRESETS[1]
+        draft = brain.make_draft("Two double cheeseburgers, one fries and a shake.", CONFIG, role=drive,
+                                 note=lambda _: None)
+        self.assertEqual([(i["description"], i["quantity"], i["source"]) for i in draft["items"]],
+                         [("Double cheeseburger", 2.0, "price list"), ("Fries", 1.0, "price list"),
+                          ("Shake", 1.0, "price list")])
+        self.assertIsNone(draft["labor"])
+        self.assertEqual(draft["total"], 20.2)
+        self.assertEqual(draft["warnings"], [])
+
+    def test_a_card_from_a_model_is_checked(self):
+        import roles
+        role = roles.clean({"title": "<b>Rocket</b> fixer", "suit": "red", "gear": "wings", "bills_labor": True,
+                            "labor_rate": "x", "price_list": [{"name": "Nozzle", "price": "12"}, ["bad", -1]]})
+        self.assertNotIn("<", role["title"])
+        self.assertEqual((role["suit"], role["gear"], role["bills_labor"]), ("#1f4fd8", "none", False))
+        self.assertEqual(role["price_list"], [["Nozzle", 12.0]])
+
     def test_nothing_useful_still_gives_a_draft(self):
         draft = brain.make_draft("hello hello testing", CONFIG, on_site_seconds=10, note=lambda _: None)
         self.assertEqual(draft["items"], [])

@@ -5,7 +5,7 @@ Read `README.md` first, then `vexo-open-kit/AGENTS.md` for the band's own rules.
 
 ## Before you change anything
 
-- Run `python3 -m unittest discover -s tests -v`. All eight must pass before and after.
+- Run `python3 -m unittest discover -s tests -v`. All of them must pass before and after.
 - Try the loop without hardware: `python3 app.py --sim --demo`.
 - Ask the team for their band number. Never guess it, never connect to another band.
 

@@ -10,7 +10,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 PAGE = Path(__file__).resolve().parent / "static" / "index.html"
-ACTIONS = {"page-tap", "send", "discard", "say"}
+ACTIONS = {"page-tap", "send", "discard", "say", "role"}
 
 
 def start(hub, port):
@@ -96,9 +96,10 @@ def pay_page(hub, number):
     rows = "".join("<tr><td>%s%s</td><td style='text-align:right'>$%.2f</td></tr>" % (
         safe(item["description"]), " &times; %g" % item["quantity"] if item["quantity"] != 1 else "", item["amount"])
         for item in draft["items"])
-    labor = draft["labor"]
-    rows += "<tr><td>Labor %g h at $%.2f/h</td><td style='text-align:right'>$%.2f</td></tr>" % (
-        labor["hours"], labor["rate"], labor["amount"])
+    labor = draft.get("labor")
+    if labor:
+        rows += "<tr><td>Labor %g h at $%.2f/h</td><td style='text-align:right'>$%.2f</td></tr>" % (
+            labor["hours"], labor["rate"], labor["amount"])
     return """<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Invoice</title>
 <body style="font:17px system-ui;max-width:520px;margin:2em auto;padding:0 1em;color:#111">

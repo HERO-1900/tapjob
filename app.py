@@ -37,6 +37,7 @@ from vexo_open.sync import Band, VexoError               # noqa: E402
 from vexo_open.transports.sim import SimTransport        # noqa: E402
 
 import billing                                           # noqa: E402
+import roles
 import brain                                             # noqa: E402
 import keys                                              # noqa: E402
 import link                                              # noqa: E402
@@ -101,13 +102,16 @@ class Hub:
         self.next_poll = 0.0
         self.paid_at = 0.0
         self.biller = billing.create(args.port)
+        self.roles = [dict(role) for role in roles.PRESETS]          # the ready-made jobs, then invented ones
+        self.roles[0].update(business=config["business_name"], labor_rate=float(config["labor_rate"]))
+        self.role = self.roles[0]
         self.state = {
             "phase": "idle", "band": band.name, "link": args.transport,
             "led": {"color": "#ffffff", "pattern": "breathe", "note": "ready"},
             "started": None, "stopped": None, "active_seconds": 0,
             "transcript": [], "interim": "", "draft": None, "invoice": None,
             "log": [], "services": {"speech": "off", "brain": brain.provider(), "billing": self.biller.label},
-            "business": config["business_name"],
+            "business": self.role["business"], "role": self.role, "roles": self.roles, "making_role": False,
         }
 
     # ---- small helpers -------------------------------------------------------------------
@@ -241,7 +245,7 @@ class Hub:
             return
         shot = self.snapshot()
         draft = brain.make_draft(words, self.config, on_site_seconds=shot.get("elapsed", 0),
-                                 active_seconds=shot["active_seconds"], note=self.note)
+                                 active_seconds=shot["active_seconds"], note=self.note, role=self.role)
         self.state["services"]["brain"] = draft["provider"]
         self.set(phase="draft", draft=draft)
         self.draft_at = time.time()
@@ -302,6 +306,33 @@ class Hub:
             self.note("Discarded.")
             self.reset()
 
+    def use_role(self, value):
+        """Another job puts the band on. Only between jobs, never in the middle of one."""
+        value = value if isinstance(value, dict) else {}
+        if self.state["phase"] != "idle":
+            self.note("Finish or discard this job before changing who wears the band.")
+            return
+        role = next((r for r in self.roles if r["id"] == value.get("id")), None)
+        if role is None and value.get("sentence"):
+            self.set(making_role=True)
+            self.note("Making a hero card for: %s" % str(value["sentence"])[:120])
+            try:
+                role = roles.invent(value["sentence"], note=self.note)
+            finally:
+                self.set(making_role=False)
+            if role:
+                taken = {r["id"] for r in self.roles}
+                while role["id"] in taken:
+                    role["id"] += "-2"
+                self.roles.append(role)
+        if not role:
+            return
+        self.role = role
+        self.set(role=role, roles=self.roles, business=role["business"])
+        self.note("Now wearing the band: %s, %s at %s (%d prices on the list)." % (
+            role["hero"], role["title"], role["business"], len(role["price_list"])))
+        self.say("%s. Ready." % role["hero"])
+
     def reset(self):
         self.set(phase="idle", started=None, stopped=None, active_seconds=0, transcript=[], interim="",
                  draft=None, invoice=None)
@@ -325,6 +356,8 @@ class Hub:
             self.send_invoice()
         elif kind == "discard":
             self.discard()
+        elif kind == "role":
+            self.use_role(value)
         elif kind == "demo-pay" and value:
             self.paid_demo.add(value)
             self.next_poll = 0
