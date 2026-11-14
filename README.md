@@ -93,7 +93,7 @@ python3 app.py 42                    # double-tap the band first: its light blin
 Close the kit's dashboard tab first: the band takes one Bluetooth connection at a time.
 
 On a Mac you can skip the commands: double-click `start.command` (it sets up Python, gets the kit,
-reads `band_number` from `config.json`, opens `.env` for your keys the first time, and starts), or `demo.command` for the pretend band.
+reads `band_number` from `config.json`, asks for any key that is still missing and saves it in `.env`, and starts), or `demo.command` for the pretend band.
 
 **Paying the test invoice:** on the Stripe page use card `4242 4242 4242 4242`, any future
 date, any CVC.
