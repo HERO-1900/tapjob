@@ -78,8 +78,9 @@ class StripeBilling:
     def create_invoice(self, draft, config):
         currency = config["currency"].lower()
         customer = {"name": draft["customer"], "metadata[source]": "tapjob"}
-        if config.get("customer_email"):
-            customer["email"] = config["customer_email"]
+        # Stripe wants an email on the customer for an invoice with a payment page. Nothing is
+        # mailed (auto_advance is off and we never call "send"), so a placeholder is enough.
+        customer["email"] = config.get("customer_email") or "customer@example.com"
         customer = self._call("POST", "customers", customer)
         invoice = self._call("POST", "invoices", {
             "customer": customer["id"], "collection_method": "send_invoice", "days_until_due": 7,
