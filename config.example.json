@@ -1,0 +1,10 @@
+{
+  "band_number": 42,
+  "business_name": "Wang & Sons Plumbing",
+  "labor_rate": 95.0,
+  "currency": "usd",
+  "customer_email": "",
+  "tap_threshold_g": 1.0,
+  "active_motion_g": 0.04,
+  "ignore_taps_after_start_s": 3.0
+}

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TapJob</title>
+<style>
+  :root { --ink:#101418; --soft:#5d6873; --line:#e3e7ea; --bg:#f5f6f4; --card:#fff; --go:#0a7d2c; --warn:#b25e00; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.45 -apple-system, "Segoe UI", system-ui, sans-serif; color:var(--ink); background:var(--bg); }
+  header { display:flex; align-items:baseline; gap:14px; padding:18px 28px 8px; }
+  header h1 { margin:0; font-size:26px; letter-spacing:-.02em; }
+  header span { color:var(--soft); }
+  main { display:grid; grid-template-columns: 300px 1fr 1.1fr; gap:18px; padding:12px 28px 28px; align-items:start; }
+  @media (max-width: 1000px) { main { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
+  h2 { margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--soft); }
+  #phase { font-size:34px; font-weight:700; letter-spacing:-.02em; margin:6px 0 2px; }
+  #hint { color:var(--soft); min-height:3em; }
+  #clock { font:600 22px ui-monospace, Menlo, monospace; margin-top:8px; }
+  .led { display:flex; align-items:center; gap:12px; margin:14px 0 4px; }
+  #dot { width:34px; height:34px; border-radius:50%; background:#fff; border:1px solid #c9cfd4; box-shadow:0 0 18px currentColor; }
+  #dot.blink { animation:blink .9s steps(2) infinite; } #dot.breathe { animation:breathe 2.4s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity:.15; } } @keyframes breathe { 50% { opacity:.3; } }
+  button { font:inherit; font-weight:600; padding:10px 14px; border-radius:10px; border:1px solid var(--ink); background:#fff; cursor:pointer; }
+  button.main { background:var(--ink); color:#fff; } button.go { background:var(--go); border-color:var(--go); color:#fff; }
+  button:disabled { opacity:.35; cursor:default; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  textarea { width:100%; min-height:70px; margin-top:12px; padding:8px 10px; font:inherit; border:1px solid var(--line); border-radius:10px; }
+  #words { min-height:180px; font-size:19px; } #words i { color:var(--soft); }
+  table { width:100%; border-collapse:collapse; } td { padding:8px 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  td.n { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  tr.total td { border:0; border-top:2px solid var(--ink); font-weight:700; font-size:20px; padding-top:12px; }
+  .tag { font-size:12px; padding:2px 7px; border-radius:99px; background:#eef1f3; color:var(--soft); margin-left:6px; white-space:nowrap; }
+  .warn { color:var(--warn); margin:10px 0 0; font-size:14px; }
+  #paid { display:none; margin-top:14px; padding:14px; border-radius:12px; background:var(--go); color:#fff; font-weight:700; font-size:24px; text-align:center; }
+  #pay { display:none; margin-top:14px; gap:16px; align-items:center; } #pay img { width:150px; height:150px; border:1px solid var(--line); border-radius:8px; }
+  #pay a { word-break:break-all; }
+  #log { font:12.5px/1.5 ui-monospace, Menlo, monospace; color:var(--soft); max-height:150px; overflow:auto; white-space:pre-wrap; }
+  small { color:var(--soft); }
+</style>
+</head>
+<body>
+<header><h1>TapJob</h1><span id="who"></span></header>
+<main>
+  <section class="card">
+    <h2>Band</h2>
+    <div id="phase">…</div>
+    <div id="hint"></div>
+    <div class="led"><div id="dot"></div><small id="lednote"></small></div>
+    <div id="clock"></div>
+    <div class="row">
+      <button class="main" id="tap">Double-tap</button>
+      <button class="go" id="send" disabled>Send invoice</button>
+      <button id="discard" disabled>Discard</button>
+    </div>
+    <textarea id="typed" placeholder="No microphone? Type what the technician says, then Add."></textarea>
+    <div class="row"><button id="add" disabled>Add words</button></div>
+  </section>
+
+  <section class="card">
+    <h2>What the band heard</h2>
+    <div id="words"></div>
+  </section>
+
+  <section class="card">
+    <h2>Invoice</h2>
+    <div id="invoice"><small>Nothing yet. Double-tap the band, say what you did and what it cost, double-tap again.</small></div>
+    <div id="pay"><img id="qr" alt="QR code of the payment page"><div><b>Customer pays here</b><br><a id="link" target="_blank" rel="noopener"></a></div></div>
+    <div id="paid">PAID</div>
+  </section>
+
+  <section class="card" style="grid-column:1/-1">
+    <h2>Under the hood</h2>
+    <small id="services"></small>
+    <div id="log"></div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const PHASES = {
+  idle: ['Ready', 'Double-tap the band to start a job.'],
+  recording: ['Listening', 'Talk while you work: what you do, the parts, what they cost. Double-tap to stop.'],
+  thinking: ['Writing the invoice', 'Turning your words into line items.'],
+  draft: ['Draft ready', 'Check it. Double-tap the band (or press Send) to send it to the customer.'],
+  sending: ['Sending', 'Creating the invoice.'],
+  sent: ['Sent', 'Waiting for the customer to pay. The band turns green when they do.'],
+  paid: ['Paid', 'Done. Double-tap for the next job.'],
+};
+const money = (n) => '$' + Number(n).toFixed(2);
+const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
+const post = (type, value) => fetch('/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, value }) });
+
+$('tap').onclick = () => post('page-tap');
+$('send').onclick = () => post('send');
+$('discard').onclick = () => post('discard');
+$('add').onclick = () => { const t = $('typed').value.trim(); if (t) { post('say', t); $('typed').value = ''; } };
+
+let shownLink = '';
+function draw(s) {
+  const [title, hint] = PHASES[s.phase] || [s.phase, ''];
+  $('phase').textContent = title; $('hint').textContent = hint;
+  $('who').textContent = s.business + ' · ' + s.band + ' (' + s.link + ')';
+  const dot = $('dot'); dot.style.background = s.led.color; dot.style.color = s.led.color;
+  dot.className = s.led.pattern === 'blink' || s.led.pattern === 'flash' ? 'blink' : s.led.pattern === 'breathe' ? 'breathe' : '';
+  $('lednote').textContent = 'band light: ' + (s.led.note || s.led.pattern);
+  $('clock').textContent = s.elapsed != null ? Math.floor(s.elapsed / 60) + ':' + String(s.elapsed % 60).padStart(2, '0') + ' on the job' : '';
+  $('send').disabled = s.phase !== 'draft'; $('discard').disabled = !(s.phase === 'draft' || s.phase === 'sent');
+  $('add').disabled = s.phase !== 'recording';
+
+  const words = $('words'); words.replaceChildren();
+  for (const line of s.transcript) words.append(el('div', line));
+  if (s.interim) words.append(el('i', s.interim));
+  if (!s.transcript.length && !s.interim) words.append(el('small', s.phase === 'recording' ? 'Listening…' : 'Words appear here while you talk.'));
+
+  const box = $('invoice');
+  if (s.draft) {
+    const d = s.draft; box.replaceChildren();
+    box.append(el('div', d.customer, 'cust')).style = 'font-size:22px;font-weight:700';
+    box.append(el('div', d.summary)).style = 'color:var(--soft);margin-bottom:8px';
+    const table = el('table');
+    for (const item of d.items) {
+      const tr = el('tr'); const name = el('td', item.description + (item.quantity !== 1 ? ' × ' + item.quantity : ''));
+      if (item.unit_price == null) name.append(el('span', 'no price said', 'tag'));
+      tr.append(name, el('td', money(item.amount), 'n')); table.append(tr);
+    }
+    const tr = el('tr'); const name = el('td', 'Labor ' + d.labor.hours + ' h at ' + money(d.labor.rate) + '/h');
+    name.append(el('span', d.labor.source, 'tag')); tr.append(name, el('td', money(d.labor.amount), 'n')); table.append(tr);
+    const total = el('tr', null, 'total'); total.append(el('td', 'Total'), el('td', money(d.total), 'n')); table.append(total);
+    box.append(table);
+    for (const w of d.warnings) box.append(el('p', w, 'warn'));
+    box.append(el('small', 'Band record: ' + d.evidence.on_site_minutes + ' min on site, hands working ' + d.evidence.hands_working_minutes + ' min. Read by ' + d.provider + '.'));
+  } else if (s.phase === 'idle') {
+    box.replaceChildren(el('small', 'Nothing yet. Double-tap the band, say what you did and what it cost, double-tap again.'));
+  }
+  const inv = s.invoice;
+  $('pay').style.display = inv && !inv.paid ? 'flex' : 'none';
+  $('paid').style.display = inv && inv.paid ? 'block' : 'none';
+  if (inv && inv.url !== shownLink) {
+    shownLink = inv.url; $('link').textContent = inv.url; $('link').href = inv.url;
+    $('qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(inv.url);
+  }
+  if (!inv) shownLink = '';
+  $('services').textContent = 'speech: ' + s.services.speech + ' · words to fields: ' + s.services.brain + ' · payment: ' + s.services.billing;
+  $('log').textContent = s.log.map((l) => new Date(l.t * 1000).toLocaleTimeString() + '  ' + l.text).reverse().join('\n');
+}
+async function tick() {
+  try { draw(await (await fetch('/state')).json()); } catch (e) { $('phase').textContent = 'Hub not running'; }
+  setTimeout(tick, 600);
+}
+tick();
+</script>
+</body>
+</html>

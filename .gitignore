@@ -1,0 +1,11 @@
+vexo-open-kit/
+vexo-open-kit
+.env
+config.json
+jobs/
+__pycache__/
+*.pyc
+.DS_Store
+recording.ogg
+.venv/
+.keys-asked
