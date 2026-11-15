@@ -54,6 +54,20 @@ wrist. Three looks (stage, comic, carbon copy) switch with one button.
 ("Teach the raised fist", under the hood); after that, holding the fist up for a second while
 a draft is waiting sends it. A double-tap still works.
 
+## The dashboard
+
+A bill that is still unpaid does not block the next job. After sending, double-tap the band or
+press **New job**: the bill stays open on the **Dashboard** (top right of the page) and the band
+is ready again. The dashboard lists every bill that went out as Waiting, Paid or Taken back,
+with the totals and a link to each payment page. Open bills are checked in the background, so
+an earlier bill turns to Paid by itself. Discard after sending voids the invoice at Stripe.
+The list is kept in `jobs/history.json` (not committed).
+
+## Try it without a band
+
+The project page runs the same loop on a pretend band in the browser, with a pretend payment:
+http://tapjob.ipolab.ai/#live
+
 ## Why a band and not a phone app
 
 Voice-to-invoice phone apps exist. They all start *after* the job: wash your hands, find the

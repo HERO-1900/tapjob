@@ -1,6 +1,6 @@
 # TapJob — text for the Devpost page
 
-**Tagline:** Every job has a hero. Say it, tap it, get paid.
+**Tagline:** Say it. Get paid. Every job has a hero.
 
 ## Inspiration
 
@@ -8,6 +8,13 @@ People who work with their hands owe someone a bill at the end of every job: the
 the sink, the crew at a drive-through window, a massage therapist, a mechanic. The bill gets
 written later, from memory, on a phone or a register their hands were too busy to touch. A
 band on the wrist is the one computer that is there while the work happens.
+
+You did the job at 2. You billed it at 11 p.m. Or never. Paperwork is a second shift nobody
+pays for, and by then half of it is forgotten. This is not a niche: the US Bureau of Labor
+Statistics counts about 3.9 million fast food and counter workers, 2.1 million waiters and
+waitresses, 806,000 auto mechanics, 575,000 hairstylists, 505,000 plumbers and pipefitters and
+100,000 gas station and car service attendants. Close to 8 million people in six jobs alone,
+before boba shops, food trucks, movers, cleaners and farmers markets.
 
 ## What it does
 
@@ -25,6 +32,14 @@ band on the wrist is the one computer that is there while the work happens.
 Every job has a hero card: plumber, drive-through order taker, massage therapist, mechanic.
 Not there? Describe your job in one sentence and Gemini writes the card, a starter price list
 and paints the hero. Paste or upload your own menu at any time.
+
+**The dashboard.** A bill that is still unpaid does not block you: double-tap (or press New
+job) and take the next one. Every bill that went out is on the dashboard as Waiting, Paid or
+Taken back, with the totals, and an earlier bill turns to Paid by itself when the customer
+pays. Discard after sending voids the invoice at Stripe.
+
+**Try it without a band.** The project page runs the same loop on a pretend band in your
+browser, from the words to PAID: http://tapjob.ipolab.ai/#live
 
 ## How we built it
 
