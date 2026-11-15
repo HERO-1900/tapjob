@@ -129,6 +129,9 @@ class Hub:
         self.face_at = 0.0
         self.teach_at = 0.0                  # when to read the face for "this is my raised fist"
         self.draft_at = 0.0
+        self.sent_at = 0.0
+        self.history = self.load_history()   # every bill that went out: waiting, paid or taken back
+        threading.Thread(target=self.watcher, daemon=True).start()
         self.state = {
             "phase": "idle", "band": band.name, "link": args.transport,
             "led": {"color": "#ffffff", "pattern": "breathe", "note": "ready"},
@@ -138,6 +141,7 @@ class Hub:
             "business": self.role["business"], "role": self.role, "roles": self.roles, "making_role": False,
             "face": None, "raise_face": config.get("raise_face") or "", "teaching": False,
             "samples": roles.SAMPLES, "painting": [], "figure": self.figure, "payee": "",
+            "history": self.history[:40],
         }
 
     # ---- small helpers -------------------------------------------------------------------
@@ -229,6 +233,9 @@ class Hub:
             if now - getattr(self, "draft_at", 0) < self.config["ignore_taps_after_draft_s"]:
                 return                                       # still reading the draft back
             self.send_invoice()
+        elif phase == "sent":
+            if now - self.sent_at > 4:                       # the bill stays open on the dashboard
+                self.next_job()
         elif phase == "paid":
             self.reset()
 
@@ -301,6 +308,8 @@ class Hub:
             self.say("I could not send the invoice. Look at the screen.")
             return
         self.set(phase="sent", invoice=invoice)
+        self.sent_at = time.time()
+        self.keep(draft, invoice)
         self.next_poll = time.time() + 2
         self.led("#ffffff", "blink", "sent: waiting for payment", period=900)
         self.note("INVOICE SENT (%s): %s" % (self.biller.label, invoice["url"]))
@@ -321,6 +330,7 @@ class Hub:
             invoice = dict(invoice, paid=True)
             self.set(phase="paid", invoice=invoice)
             self.paid_at = time.time()
+            self.mark(invoice["id"], "paid")
             self.led("#00ff44", "solid", "paid")
             self.note("PAID.")
             self.say("Payment received.")
@@ -342,6 +352,7 @@ class Hub:
             if self.state["phase"] == "sent" and invoice and hasattr(self.biller, "void"):
                 try:                                         # taking a sent bill back, for real
                     self.biller.void(invoice["id"])
+                    self.mark(invoice["id"], "void")
                     self.note("The invoice was taken back: Stripe has voided it.")
                 except billing.BillingError as problem:
                     self.note("Could not void the invoice at Stripe: %s" % problem)
@@ -470,6 +481,67 @@ class Hub:
             self.note("Fist raised: sending.")
             self.send_invoice()
 
+    # ---- the dashboard: every bill that went out, and whether it has been paid -------------
+
+    def load_history(self):
+        try:
+            jobs = json.loads((HERE / "jobs" / "history.json").read_text(encoding="utf-8"))
+            return [job for job in jobs if isinstance(job, dict) and job.get("id")][:200]
+        except (OSError, ValueError):
+            return []
+
+    def save_history(self):
+        with self.lock:
+            self.state["history"] = [dict(job) for job in self.history[:40]]
+        try:
+            folder = HERE / "jobs"
+            folder.mkdir(exist_ok=True)
+            (folder / "history.json").write_text(json.dumps(self.history[:200], indent=2), encoding="utf-8")
+        except OSError as problem:
+            self.note("Could not save the dashboard: %s" % problem)
+
+    def keep(self, draft, invoice):
+        self.history.insert(0, {
+            "id": invoice["id"], "url": invoice.get("url", ""), "total": draft.get("total", 0),
+            "customer": draft.get("customer") or "", "summary": draft.get("summary") or "",
+            "lines": len(draft.get("items") or []), "business": self.role["business"], "hero": self.role.get("hero", ""),
+            "at": time.time(), "status": "sent", "paid_at": None})
+        self.save_history()
+
+    def mark(self, number, status):
+        for job in self.history:
+            if job["id"] == number and job["status"] != status:
+                job["status"] = status
+                job["paid_at"] = time.time() if status == "paid" else None
+                self.save_history()
+                return job
+        return None
+
+    def next_job(self):
+        """Leave a sent bill open on the dashboard and get ready for the next job."""
+        if self.state["phase"] == "sent":
+            self.note("That bill stays open on the dashboard. Ready for the next job.")
+        self.reset()
+
+    def watcher(self):
+        """Off the main loop: ask whether the bills left open have been paid."""
+        while True:
+            time.sleep(4)
+            current = (self.state.get("invoice") or {}).get("id")
+            for job in [job for job in self.history[:12] if job["status"] == "sent" and job["id"] != current]:
+                try:
+                    if job["id"] in self.paid_demo or self.biller.is_paid(job["id"]):
+                        self.inbox.put(("job-paid", job["id"]))
+                except Exception:                            # no network just now: ask again next time
+                    pass
+
+    def job_paid(self, number):
+        job = self.mark(number, "paid")
+        if job:
+            self.note("PAID (an earlier bill): %s" % brain.money(job["total"], self.config["currency"]))
+            if self.state["phase"] == "idle":
+                self.say("An earlier bill was paid.")
+
     def reset(self):
         self.set(phase="idle", started=None, stopped=None, active_seconds=0, transcript=[], interim="",
                  draft=None, invoice=None)
@@ -493,6 +565,10 @@ class Hub:
             self.send_invoice()
         elif kind == "discard":
             self.discard()
+        elif kind == "new" and self.state["phase"] in ("sent", "paid"):
+            self.next_job()
+        elif kind == "job-paid":
+            self.job_paid(value)
         elif kind == "role":
             self.use_role(value)
         elif kind == "face" and value is not None:

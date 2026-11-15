@@ -245,6 +245,14 @@
   .invent div { display:flex; gap:8px; }
   .invent input { flex:1; min-width:0; padding:10px 12px; font-size:19px; border:var(--edge) solid var(--ink); border-radius:var(--round); background:var(--paper); color:var(--pen); }
   .invent small { display:block; min-height:1.5em; margin-top:6px; font-size:15px; }
+  .boardacts { display:flex; align-items:center; gap:14px; margin:14px 0 16px; }
+  .brow { display:grid; grid-template-columns:74px minmax(0,1fr) 110px 120px 110px; gap:14px; align-items:center; padding:12px 0; border-top:1px solid color-mix(in srgb, currentColor 18%, transparent); }
+  .brow b { font-weight:700; } .brow small { display:block; opacity:.7; }
+  .brow .sum { text-align:right; font:var(--display-weight) 20px/1 var(--display); }
+  .brow a { color:inherit; }
+  .state { justify-self:start; padding:5px 12px; border-radius:99px; font-weight:700; font-size:13px; background:#ffe7a8; color:#5b4300; }
+  .state.paid { background:#c9f7dd; color:#0b6b3a; } .state.void { background:#e4e6ee; color:#4b5168; }
+  .empty { padding:26px 0; opacity:.7; }
   .shut { position:sticky; top:0; float:right; z-index:10; margin:0 0 0 12px; }
   [data-look="stage"] .shut { background:#fff; color:#0b1020; border-color:#fff; box-shadow:0 8px 24px rgba(0,0,0,.5); }
 
@@ -308,6 +316,7 @@
   <h1 class="brand">TapJob</h1>
   <span class="shop" id="shop"></span>
   <span class="payee push" id="payee"></span>
+  <button class="small" id="openboard">Dashboard</button>
   <button class="small" id="look" title="Switch the look of this page">Look: carbon copy</button>
   <span class="link off" id="link"><b></b><span id="linktext">Looking for the band</span></span>
 </header>
@@ -339,6 +348,7 @@
       <button class="solid" id="tap" title="The same as double-tapping the band">Double-tap</button>
       <button class="pay" id="send" disabled>Send</button>
       <button id="discard" disabled>Discard</button>
+      <button id="next" hidden>New job</button>
     </div>
   </section>
 
@@ -388,6 +398,14 @@
     <div><input id="sentence" maxlength="200" placeholder="I fix rockets on the launch pad" autocomplete="off"><button class="solid" id="make">Make my hero</button></div>
     <small id="making"></small>
   </form>
+</dialog>
+
+<dialog id="board" aria-labelledby="boardtitle">
+  <button class="small shut" id="shutboard">Close</button>
+  <h2 id="boardtitle">Dashboard</h2>
+  <p id="boardsum"></p>
+  <div class="boardacts"><button class="solid" id="boardnew">New job</button><small id="boardhint"></small></div>
+  <div id="boardrows"></div>
 </dialog>
 
 <dialog id="prices" aria-labelledby="pricestitle">
@@ -501,6 +519,33 @@ $('discard').onclick = () => post('discard');
 $('add').onclick = () => { const t = $('typed').value.trim(); if (t) { post('say', t); $('typed').value = ''; } };
 $('teach').onclick = () => post('teach-raise');
 $('change').onclick = () => $('jobs').showModal();
+$('openboard').onclick = () => $('board').showModal();
+$('shutboard').onclick = () => $('board').close();
+$('next').onclick = () => post('new');
+$('boardnew').onclick = () => { post('new'); $('board').close(); };
+const STATES = { sent: 'Waiting', paid: 'Paid', void: 'Taken back' };
+function drawBoard(s) {
+  const jobs = s.history || [], open = jobs.filter((j) => j.status === 'sent'), paid = jobs.filter((j) => j.status === 'paid');
+  const add = (list) => list.reduce((sum, j) => sum + (Number(j.total) || 0), 0);
+  $('openboard').textContent = 'Dashboard' + (jobs.length ? ' (' + paid.length + ' paid, ' + open.length + ' waiting)' : '');
+  $('boardsum').textContent = jobs.length ? paid.length + ' paid, ' + money(add(paid)) + '. ' + open.length + ' waiting, ' + money(add(open)) + '.'
+    : 'Every bill you send shows up here, with whether it has been paid.';
+  const can = s.phase === 'sent' || s.phase === 'paid';
+  $('boardnew').disabled = !can; $('next').hidden = !can;
+  $('boardhint').textContent = s.phase === 'sent' ? 'The bill you just sent stays here while you start the next job.'
+    : s.phase === 'idle' ? 'Ready. Double-tap the band to start a job.' : can ? '' : 'A job is in progress.';
+  const rows = $('boardrows'), key = JSON.stringify(jobs.map((j) => [j.id, j.status]));
+  if (rows.dataset.key === key) return;                       // nothing changed: leave the list alone
+  rows.dataset.key = key; rows.replaceChildren();
+  if (!jobs.length) rows.append(el('div', 'No bills yet.', 'empty'));
+  for (const j of jobs) {
+    const row = el('div', null, 'brow'), what = el('div'), when = new Date(j.at * 1000);
+    what.append(el('b', j.customer || j.summary || (j.lines + ' lines')), el('small', (j.hero ? j.hero + ', ' : '') + (j.business || '')));
+    const link = el('a', 'Payment page'); link.href = j.url; link.target = '_blank'; link.rel = 'noopener';
+    row.append(el('span', when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })), what, el('span', STATES[j.status] || j.status, 'state ' + j.status), link, el('span', money(j.total), 'sum'));
+    rows.append(row);
+  }
+}
 $('shut').onclick = () => $('jobs').close();
 function setLook(name) {
   if (!LOOKS[name]) name = 'stage';
@@ -698,6 +743,7 @@ function draw(s) {
   words.scrollTop = words.scrollHeight;
 
   drawTicket(s);
+  drawBoard(s);
   const sv = s.services || {};
   $('services').textContent = 'Speech: ' + sv.speech + '. Words to line items: ' + sv.brain + '. Payment: ' + sv.billing + '.';
   $('log').textContent = (s.log || []).map((l) => new Date(l.t * 1000).toLocaleTimeString() + '  ' + l.text).reverse().join('\n');
