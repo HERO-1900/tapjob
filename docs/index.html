@@ -153,6 +153,12 @@
   .track li.on { color:var(--ink); border-color:var(--c); }
   .who { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr); gap:28px; align-items:stretch; }
   .who .own { margin:0; grid-template-columns:1fr; align-content:center; }
+  .size { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:12px; margin:0 0 22px; padding:0; list-style:none; }
+  .size li { padding:20px 16px 18px; border:1px solid var(--line); border-radius:20px; background:linear-gradient(165deg, rgba(255,255,255,.09), rgba(255,255,255,.02)); }
+  .size b { display:block; font:800 clamp(30px, 3.3vw, 44px)/1 var(--display); letter-spacing:-.05em; }
+  .size span { display:block; margin-top:10px; font-size:14.5px; line-height:1.35; color:var(--soft); }
+  .scenes { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; padding:0; list-style:none; }
+  .scenes li { padding:8px 15px; border:1px solid var(--line); border-radius:999px; font:600 14.5px/1 var(--display); }
   .vision { padding:150px 0 50px; text-align:center; }
   .vision h2 { margin:0 auto 24px; max-width:15ch; font:800 clamp(40px, 6.2vw, 88px)/.98 var(--display); letter-spacing:-.055em; text-wrap:balance; }
   .vision p { max-width:50ch; margin:0 auto; font-size:21px; color:var(--soft); }
@@ -195,7 +201,7 @@
 
   .rise { opacity:0; transform:translateY(22px); transition:opacity 600ms, transform 600ms; }
   .rise.in { opacity:1; transform:none; }
-  @media (max-width: 980px) { .top, .try, .beat, .problem, .hand, .who { grid-template-columns:1fr; } .beat { gap:30px; min-height:0; padding:70px 0 20px; } .beat.flip .words { order:0; } .problem { min-height:0; } .notes { height:400px; } .notes div { width:210px; font-size:17px; } .dots, .count { display:none; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .rules, .next { grid-template-columns:1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
+  @media (max-width: 980px) { .top, .try, .beat, .problem, .hand, .who { grid-template-columns:1fr; } .beat { gap:30px; min-height:0; padding:70px 0 20px; } .beat.flip .words { order:0; } .problem { min-height:0; } .notes { height:400px; } .notes div { width:210px; font-size:17px; } .dots, .count { display:none; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .rules, .next { grid-template-columns:1fr; } .size { grid-template-columns:1fr 1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
   @media (prefers-reduced-motion: reduce) { .band.live i { animation:none; height:22px; } .rise { opacity:1; transform:none; transition:none; } .row, .paid, .hero, .phone, body, .dots a { transition:none; } .phone.back { transform:rotate(-4deg); opacity:.94; } .phone.front { transform:translateY(54px) rotate(2.5deg); opacity:1; } html { scroll-behavior:auto; } }
 </style>
 </head>
@@ -280,6 +286,19 @@
       <kbd>i fix the rocket</kbd>
     </div>
   </div>
+
+  <h2 class="rise" data-s="How many people">Close to 8 million Americans do just these six jobs</h2>
+  <p class="sub rise">They take orders and finish jobs with their hands full. The paperwork comes later, on their own time.</p>
+  <ul class="size rise">
+    <li><b>3.9M</b><span>Fast food and counter workers</span></li>
+    <li><b>2.1M</b><span>Waiters and waitresses</span></li>
+    <li><b>806K</b><span>Auto mechanics</span></li>
+    <li><b>575K</b><span>Hairstylists, about half of them self-employed</span></li>
+    <li><b>505K</b><span>Plumbers and pipefitters</span></li>
+    <li><b>100K</b><span>Gas station and car service attendants</span></li>
+  </ul>
+  <ul class="scenes rise"><li>Drive-through</li><li>Table service</li><li>Boba and coffee</li><li>Food truck</li><li>Gas station</li><li>Auto shop</li><li>Home repair</li><li>Salon and barbershop</li><li>Massage</li><li>Movers</li><li>Cleaning</li><li>Pet care</li><li>Farmers market</li></ul>
+  <p class="label rise">US jobs, Bureau of Labor Statistics, 2024 and 2025 figures. The same hands-full moment exists wherever people work on their feet.</p>
 
   <h2 class="rise" data-s="The rules">The model never touches the money</h2>
   <div class="rules rise">
