@@ -108,6 +108,14 @@ class Hub:
         self.roles = [dict(role) for role in roles.PRESETS]          # the ready-made jobs, then invented ones
         self.roles[0].update(business=config["business_name"], labor_rate=float(config["labor_rate"]))
         self.role = self.roles[0]
+        kept = config.get("role")                                    # who wore the band last time
+        if isinstance(kept, dict) and kept.get("id"):
+            known = next((r for r in self.roles if r["id"] == kept["id"]), None)
+            if known is None:                                        # a card made from a sentence
+                known = roles.clean(kept)
+                known["id"] = str(kept["id"])[:60]
+                self.roles.append(known)
+            self.role = known
         self.face = None                     # which side of the band points up (from its orientation events)
         self.face_at = 0.0
         self.teach_at = 0.0                  # when to read the face for "this is my raised fist"
@@ -345,9 +353,20 @@ class Hub:
             return
         self.role = role
         self.set(role=role, roles=self.roles, business=role["business"])
+        self.remember(role=role)
         self.note("Now wearing the band: %s, %s at %s (%d prices on the list)." % (
             role["hero"], role["title"], role["business"], len(role["price_list"])))
         self.say("%s. Ready." % role["hero"])
+
+    def remember(self, **settings):
+        """Kept in config.json for the next start (the file is not in git)."""
+        try:
+            path = HERE / "config.json"
+            saved = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+            saved.update(settings)
+            path.write_text(json.dumps(saved, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        except (OSError, ValueError) as problem:
+            self.note("Could not save that in config.json: %s" % problem)
 
     def gestures(self):
         """The raised fist: taught once, then it sends the draft. Called from the main loop."""
@@ -361,13 +380,7 @@ class Hub:
                 return
             self.config["raise_face"] = self.face
             self.set(raise_face=self.face)
-            try:                                             # remembered for the next start
-                path = HERE / "config.json"
-                saved = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-                saved["raise_face"] = self.face
-                path.write_text(json.dumps(saved, indent=2) + "\n", encoding="utf-8")
-            except (OSError, ValueError) as problem:
-                self.note("Could not save the gesture in config.json: %s" % problem)
+            self.remember(raise_face=self.face)
             self.note("Raised fist learned: the band points %s up. Hold it up for a second to send a draft." % self.face)
             self.say("Got it. Raise your fist to send.")
             return
