@@ -255,25 +255,28 @@
   }
   /* a painted hero, when there is one: a poster, the job in big letters over the figure */
   .art { position:relative; }
-  .art.poster { display:flex; flex-direction:column; overflow:hidden; border-radius:22px;
-    background:repeating-conic-gradient(from 0deg at 50% 64%, rgba(255,255,255,.13) 0 9deg, transparent 9deg 18deg),
-               radial-gradient(circle at 50% 64%, var(--backdrop, #ffe28c) 0, var(--backdrop, #ffe28c) 34%, color-mix(in srgb, var(--backdrop, #ffe28c) 42%, #070a16) 100%); }
-  /* the picture melts into the glow: its own flat colour is the glow's colour, and its edges fade out */
-  .art.poster img { flex:1; min-height:0; width:100%; object-fit:contain; object-position:50% 100%; border-radius:0; background:none;
-    -webkit-mask-image:radial-gradient(ellipse 76% 72% at 50% 54%, #000 66%, transparent 100%); mask-image:radial-gradient(ellipse 76% 72% at 50% 54%, #000 66%, transparent 100%); }
-  /* the title: always white, on a shade that fades into the glow */
-  .shout { flex:none; display:flex; align-items:center; min-height:56px; padding:12px 14px 14px; color:#fff;
-           background:linear-gradient(to bottom, rgba(7,10,22,.92), rgba(7,10,22,.6) 68%, rgba(7,10,22,0));
+  /* The poster's ground IS the picture: the same image, enlarged and blurred, fills the card, so the sharp
+     picture on top has nothing to stand out from. Light rays lie over both, only towards the rim. */
+  .art.poster { position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:22px; background:#0b1020; isolation:isolate; }
+  .art.poster::before { content:""; position:absolute; inset:-14%; z-index:0; background:var(--art) 50% 50%/cover no-repeat; filter:blur(26px) saturate(1.06); }
+  .art.poster::after { content:""; position:absolute; inset:0; z-index:2; pointer-events:none; mix-blend-mode:soft-light;
+    background:repeating-conic-gradient(from 0deg at 50% 60%, rgba(255,255,255,.55) 0 8deg, transparent 8deg 16deg);
+    -webkit-mask-image:radial-gradient(ellipse 62% 60% at 50% 60%, transparent 52%, #000 100%); mask-image:radial-gradient(ellipse 62% 60% at 50% 60%, transparent 52%, #000 100%); }
+  .art.poster img { position:relative; z-index:1; flex:1 1 0; min-height:0; height:100%; width:auto; max-width:100%; aspect-ratio:3/4; align-self:center;
+    object-fit:cover; border-radius:0; background:none;
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 9%, #000 96%, transparent 100%);
+    -webkit-mask-composite:source-in; mask-image:linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 9%, #000 96%, transparent 100%); mask-composite:intersect; }
+  .shout { position:relative; z-index:3; flex:none; display:flex; align-items:center; min-height:56px; padding:12px 14px 14px; color:#fff;
+           background:linear-gradient(to bottom, rgba(7,10,22,.9), rgba(7,10,22,.55) 70%, rgba(7,10,22,0));
            font:800 22px/.98 "Sora", var(--display); letter-spacing:-.04em; text-transform:uppercase; overflow-wrap:anywhere; text-shadow:0 1px 10px rgba(7,10,22,.6); }
   .shout.long { font-size:18px; } .shout.longer { font-size:15px; line-height:1.04; }
   .me .art.poster .shout { padding-right:36px; }
   .me .art.poster { width:200px; height:262px; }
   [data-look="stage"] .me .art.poster { width:204px; height:270px; margin:0 0 12px 0; box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 0 54px -8px var(--cape), 0 26px 44px -18px #000; }
-  .card .art.poster, [data-look="stage"] .card .art.poster, [data-look="comic"] .card .art.poster { padding:0; height:340px; border-radius:0; border-bottom:0;
-    background:repeating-conic-gradient(from 0deg at 50% 64%, rgba(255,255,255,.13) 0 9deg, transparent 9deg 18deg),
-               radial-gradient(circle at 50% 64%, var(--backdrop, #ffe28c) 0, var(--backdrop, #ffe28c) 34%, color-mix(in srgb, var(--backdrop, #ffe28c) 42%, #070a16) 100%); }
+  .card .art.poster, [data-look="stage"] .card .art.poster, [data-look="comic"] .card .art.poster { padding:0; height:340px; border-radius:0; border-bottom:0; background:#0b1020; }
   .card .shout { min-height:66px; padding:14px 16px 16px; font-size:21px; }
   .card .shout.long { font-size:18px; } .card .shout.longer { font-size:15.5px; }
+  .art.poster i.led { z-index:4; }
   i.led { position:absolute; right:13px; top:21px; width:13px; height:13px; border-radius:50%; background:currentColor; box-shadow:0 0 0 2px rgba(0,0,0,.45), 0 0 10px currentColor, 0 0 22px currentColor; }
   .painting { position:absolute; left:6px; bottom:6px; padding:3px 9px; border-radius:99px; background:rgba(7,10,22,.72); color:#fff; font:600 11px/1.2 var(--print); white-space:nowrap; }
   .figure { display:flex; align-items:center; gap:8px; margin:0 0 14px; font:600 15px/1.2 var(--print); }
@@ -479,7 +482,8 @@ const heroHTML = (role, withLed) => {
   const title = String(role.title || ''), size = title.length > 20 ? ' longer' : title.length > 11 ? ' long' : '';
   return '<b class="shout' + size + '">' + esc(title) + '</b><img src="' + esc(role.art) + '" alt="' + esc(role.hero || 'Hero') + '">' + (withLed ? '<i class="led"></i>' : '');
 };
-const frame = (box, role) => { box.classList.toggle('poster', !!role.art); box.style.setProperty('--backdrop', hex(role.backdrop, '#ffe28c')); };
+const frame = (box, role) => { box.classList.toggle('poster', !!role.art); box.style.setProperty('--backdrop', hex(role.backdrop, '#ffe28c'));
+  box.style.setProperty('--art', role.art ? 'url("' + String(role.art).replace(/["\\()]/g, '') + '")' : 'none'); };
 const tint = (box) => {                         // the poster takes the picture's own corner colour: no seam
   const img = box.querySelector('img'); if (!img) return;
   const take = () => { try {
