@@ -49,6 +49,7 @@
   .link b { width:10px; height:10px; border-radius:50%; background:var(--paid); }
   .link.off b { background:var(--serial); }
   .push { margin-left:auto; }
+  .payee { font:600 13.5px/1.2 var(--print); opacity:.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   .setup { margin:4px 34px 0; }
   .setup summary { cursor:pointer; width:max-content; font:500 16px/1.2 var(--print); padding:3px 0; }
@@ -254,17 +255,18 @@
   /* a painted hero, when there is one: a poster, the job in big letters over the figure */
   .art { position:relative; }
   .art.poster { display:flex; flex-direction:column; overflow:hidden; border-radius:22px; background:var(--backdrop, #ffe28c); }
-  .art.poster img { flex:1; min-height:0; width:100%; object-fit:contain; object-position:50% 100%;
-    -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 16%), linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
-    -webkit-mask-composite:source-in; mask-image:linear-gradient(to bottom, transparent 0, #000 16%), linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%); mask-composite:intersect; }
-  .shout { flex:none; padding:13px 34px 0 14px; font:800 25px/.94 "Sora", var(--display); letter-spacing:-.045em; text-transform:uppercase; color:#0b1020; overflow-wrap:anywhere; }
-  .shout.long { font-size:20px; } .shout.longer { font-size:16.5px; line-height:1; }
+  .art.poster img { flex:1; min-height:0; width:100%; object-fit:contain; object-position:50% 100%; border-radius:0; background:none; }
+  /* the title band: always the same, white on near-black, whatever the picture's colour */
+  .shout { flex:none; display:flex; align-items:center; min-height:56px; padding:9px 14px; background:#0b1020; color:#fff;
+           font:800 22px/.98 "Sora", var(--display); letter-spacing:-.04em; text-transform:uppercase; overflow-wrap:anywhere; }
+  .shout.long { font-size:18px; } .shout.longer { font-size:15px; line-height:1.04; }
+  .me .art.poster .shout { padding-right:36px; }
   .me .art.poster { width:200px; height:262px; }
-  [data-look="stage"] .me .art.poster { width:204px; height:266px; margin:0 0 12px 0; box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 0 54px -8px var(--cape), 0 26px 44px -18px #000; }
-  .card .art.poster, [data-look="stage"] .card .art.poster, [data-look="comic"] .card .art.poster { padding:0; height:330px; border-radius:0; border-bottom:0; background:var(--backdrop, #ffe28c); }
-  .card .shout { padding:14px 14px 2px; font-size:24px; min-height:54px; }
-  .card .shout.long { font-size:20px; } .card .shout.longer { font-size:17px; }
-  i.led { position:absolute; right:12px; top:12px; width:13px; height:13px; border-radius:50%; background:currentColor; box-shadow:0 0 0 2px rgba(0,0,0,.45), 0 0 10px currentColor, 0 0 22px currentColor; }
+  [data-look="stage"] .me .art.poster { width:204px; height:270px; margin:0 0 12px 0; box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 0 54px -8px var(--cape), 0 26px 44px -18px #000; }
+  .card .art.poster, [data-look="stage"] .card .art.poster, [data-look="comic"] .card .art.poster { padding:0; height:340px; border-radius:0; border-bottom:0; background:var(--backdrop, #ffe28c); }
+  .card .shout { min-height:62px; padding:10px 16px; font-size:21px; }
+  .card .shout.long { font-size:18px; } .card .shout.longer { font-size:15.5px; }
+  i.led { position:absolute; right:13px; top:21px; width:13px; height:13px; border-radius:50%; background:currentColor; box-shadow:0 0 0 2px rgba(0,0,0,.45), 0 0 10px currentColor, 0 0 22px currentColor; }
   .painting { position:absolute; left:6px; bottom:6px; padding:3px 9px; border-radius:99px; background:rgba(7,10,22,.72); color:#fff; font:600 11px/1.2 var(--print); white-space:nowrap; }
   .figure { display:flex; align-items:center; gap:8px; margin:0 0 14px; font:600 15px/1.2 var(--print); }
 
@@ -294,7 +296,8 @@
 <header class="top">
   <h1 class="brand">TapJob</h1>
   <span class="shop" id="shop"></span>
-  <button class="small push" id="look" title="Switch the look of this page">Look: carbon copy</button>
+  <span class="payee push" id="payee"></span>
+  <button class="small" id="look" title="Switch the look of this page">Look: carbon copy</button>
   <span class="link off" id="link"><b></b><span id="linktext">Looking for the band</span></span>
 </header>
 
@@ -659,6 +662,7 @@ function draw(s) {
   $('fist').textContent = s.teaching ? 'Raise your fist to the sky and hold it…'
     : s.raise_face ? 'Raising the fist for a second sends a draft (the band then points ' + s.raise_face + ' up).' : 'Not taught yet: raise-to-send is off.';
   $('shop').textContent = s.business || '';
+  $('payee').textContent = s.payee ? 'Bills are paid into ' + s.payee : '';
   $('link').className = 'link'; $('linktext').textContent = (s.band || 'Band') + ' ' + (LINKS[s.link] || s.link || '');
   const led = document.querySelector('#meart .led'), light = s.led || {};
   if (led) {

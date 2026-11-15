@@ -108,3 +108,13 @@ class StripeBilling:
 
     def is_paid(self, number):
         return self._call("GET", "invoices/%s" % number).get("status") == "paid"
+
+    def payee(self):
+        """The name of the Stripe account these invoices are paid into (asked once, shown on the page)."""
+        try:
+            account = self._call("GET", "account")
+        except BillingError:
+            return "your Stripe account (test mode)"
+        name = ((account.get("settings") or {}).get("dashboard") or {}).get("display_name") \
+            or (account.get("business_profile") or {}).get("name") or "your Stripe account"
+        return "%s, Stripe test mode" % str(name)[:60]

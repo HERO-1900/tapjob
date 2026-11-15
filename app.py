@@ -137,7 +137,7 @@ class Hub:
             "log": [], "services": {"speech": "off", "brain": brain.provider(), "billing": self.biller.label},
             "business": self.role["business"], "role": self.role, "roles": self.roles, "making_role": False,
             "face": None, "raise_face": config.get("raise_face") or "", "teaching": False,
-            "samples": roles.SAMPLES, "painting": [], "figure": self.figure,
+            "samples": roles.SAMPLES, "painting": [], "figure": self.figure, "payee": "",
         }
 
     # ---- small helpers -------------------------------------------------------------------
@@ -371,6 +371,15 @@ class Hub:
             role["hero"], role["title"], role["business"], len(role["price_list"])))
         self.say("%s. Ready." % role["hero"])
 
+    def ask_payee(self):
+        """Off the main loop: whose Stripe account is this? Shown on the page."""
+        biller = self.biller
+
+        def work():
+            name = biller.payee() if hasattr(biller, "payee") else "the built-in demo pay page (no Stripe key)"
+            self.set(payee=name)
+        threading.Thread(target=work, daemon=True).start()
+
     def painter(self):
         """Its own thread: asks the image model for one picture at a time, never holds up the band."""
         while True:
@@ -521,6 +530,8 @@ class Hub:
         self.state["services"]["brain"] = brain.provider()
         self.state["services"]["billing"] = self.biller.label
         self.note("Key saved in .env: %s" % name)
+        if name == "STRIPE_SECRET_KEY":
+            self.ask_payee()
 
     def run(self, seconds=None):
         band = self.band
@@ -538,6 +549,7 @@ class Hub:
         self.note("Connected to %s. Double-tap the band to start a job." % band.name)
         for role in [self.role] + [r for r in self.roles if r is not self.role]:
             self.paint(role)                                 # pictures for the cards, the wearer's first
+        self.ask_payee()
         end = time.time() + seconds if seconds else None
         while band.connected or getattr(band, "reconnecting", False):
             band.wait(0.2)

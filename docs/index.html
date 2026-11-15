@@ -12,7 +12,7 @@
   :root { --night:#070a16; --ink:#f3f6ff; --soft:rgba(243,246,255,.74); --line:rgba(255,255,255,.14); --go:#25e08a;
           --display:"Sora", "Helvetica Neue", Arial, sans-serif; --text:"Manrope", "Helvetica Neue", Arial, sans-serif; }
   * { box-sizing:border-box; }
-  body { margin:0; color:var(--ink); font:18px/1.55 var(--text);
+  body { margin:0; color:var(--ink); font:18px/1.6 var(--text); -webkit-font-smoothing:antialiased;
          background:radial-gradient(1100px 700px at 8% 4%, rgba(31,79,216,.5), transparent 68%), radial-gradient(900px 620px at 100% 0, rgba(226,59,46,.34), transparent 64%), var(--night); background-color:var(--night); }
   a { color:inherit; }
   :focus-visible { outline:3px solid #fff; outline-offset:3px; }
@@ -23,11 +23,11 @@
   .button { display:inline-block; padding:13px 22px; border-radius:999px; text-decoration:none; font:700 16px/1 var(--display); color:#0b1020; background:#fff; }
   .button.line { background:transparent; color:var(--ink); border:1px solid rgba(255,255,255,.35); }
   h1 { margin:64px 0 18px; font:800 clamp(46px, 8vw, 104px)/.94 var(--display); letter-spacing:-.055em; max-width:11ch; }
-  .lede { max-width:56ch; font-size:21px; color:var(--soft); margin:0 0 30px; }
+  .lede { max-width:44ch; margin:0 0 32px; font:500 23px/1.48 var(--text); letter-spacing:-.012em; color:rgba(243,246,255,.9); text-wrap:pretty; }
   .calls { display:flex; flex-wrap:wrap; gap:12px; }
   .posters { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:18px; margin:64px 0 0; }
   .poster { margin:0; border-radius:26px; overflow:hidden; background:var(--c); color:#0b1020; box-shadow:0 34px 60px -30px #000; }
-  .poster b { display:block; padding:18px 18px 0; min-height:74px; font:800 25px/.95 var(--display); letter-spacing:-.045em; text-transform:uppercase; }
+  .poster b { display:flex; align-items:center; min-height:70px; padding:10px 18px; background:#0b1020; color:#fff; font:800 21px/1 var(--display); letter-spacing:-.04em; text-transform:uppercase; }
   .poster img { display:block; width:100%; height:auto; }
   .poster figcaption { padding:14px 18px 18px; background:#0e1326; color:var(--ink); }
   .poster figcaption strong { display:block; font:800 21px/1.1 var(--display); letter-spacing:-.035em; }
@@ -95,7 +95,7 @@
   <h2 id="try">Try it</h2>
   <div class="try">
     <div>
-      <p class="lede" style="font-size:19px">The band talks to a small program on your own laptop, so the live version runs there, not on this site. Without a band, the pretend one runs the whole loop in half a minute.</p>
+      <p class="lede" style="font-size:20px">The band talks to a small program on your own laptop, so the live version runs there, not on this site. Without a band, the pretend one runs the whole loop in half a minute.</p>
       <ul class="made"><li>Vexo Open band</li><li>Deepgram</li><li>Gemini 4</li><li>Stripe</li></ul>
     </div>
     <pre>git clone https://github.com/HERO-1900/tapjob
