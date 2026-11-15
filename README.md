@@ -168,10 +168,10 @@ loop against the kit's pretend band.
   live speech-to-text, Gemini's draft, a price list order with every line priced in code, a
   Stripe test invoice, payment with the test card, the PAID state. Also on the real services:
   a job card from one sentence, and the hero pictures from Gemini's image model.
+- The raised fist was taught and used on the real band once (it learned "+x up" and sent a
+  $29.30 order). Once is not a test: expect it to need tuning on other wrists.
 - Written today and not yet proven on the wrist: finding the band over Bluetooth with retries
-  (`link.py`; the first Bluetooth try failed while the kit's dashboard held the band), and the
-  raised fist (the band's orientation events arrive; teaching and sending by it were not
-  confirmed before the deadline).
+  (`link.py`; the first Bluetooth try failed while the kit's dashboard held the band).
 - Found the hard way: a loudspeaker next to the band can shake it into a double-tap. Taps are
   ignored while the computer is speaking.
 - Tuned by guess, not measured: the tap sensitivity and the "hands working" motion threshold
