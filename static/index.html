@@ -469,6 +469,15 @@ const heroHTML = (role, withLed) => {
   return '<b class="shout' + size + '">' + esc(title) + '</b><img src="' + esc(role.art) + '" alt="' + esc(role.hero || 'Hero') + '">' + (withLed ? '<i class="led"></i>' : '');
 };
 const frame = (box, role) => { box.classList.toggle('poster', !!role.art); box.style.setProperty('--backdrop', hex(role.backdrop, '#ffe28c')); };
+const tint = (box) => {                         // the poster takes the picture's own corner colour: no seam
+  const img = box.querySelector('img'); if (!img) return;
+  const take = () => { try {
+    const c = document.createElement('canvas'); c.width = c.height = 1;
+    const g = c.getContext('2d'); g.drawImage(img, 8, 8, 1, 1, 0, 0, 1, 1);
+    const [r, gg, b] = g.getImageData(0, 0, 1, 1).data; box.style.setProperty('--backdrop', 'rgb(' + r + ',' + gg + ',' + b + ')');
+  } catch (e) {} };
+  if (img.complete && img.naturalWidth) take(); else img.addEventListener('load', take);
+};
 
 /* ---- buttons ---- */
 $('tap').onclick = () => post('page-tap');
@@ -544,6 +553,7 @@ function drawRole(s) {
     shownRole = stamp;
     frame($('meart'), role);
     $('meart').innerHTML = heroHTML(role, true) + ((s.painting || []).includes(role.id) ? '<span class="painting">Painting the picture…</span>' : '');
+    tint($('meart'));
     document.documentElement.style.setProperty('--suit', hex(role.suit, '#1f4fd8'));
     document.documentElement.style.setProperty('--cape', hex(role.cape, '#e23b2e'));
     $('mehero').textContent = role.hero; $('metitle').textContent = role.title;
@@ -555,7 +565,7 @@ function drawRole(s) {
     for (const r of all) {
       const card = el('button', null, 'card' + (r.id === role.id ? ' on' : '')); card.type = 'button';
       card.style.setProperty('--cape', hex(r.cape, '#e23b2e'));
-      const art = el('div', null, 'art'); frame(art, r); art.innerHTML = heroHTML(r, false);
+      const art = el('div', null, 'art'); frame(art, r); art.innerHTML = heroHTML(r, false); tint(art);
       const prices = (r.price_list || []).length;
       card.append(art, el('strong', r.hero), el('span', r.title), el('p', r.power),
         el('small', prices + (prices === 1 ? ' price' : ' prices') + ' on the list' + (r.bills_labor ? ', bills ' + money(r.labor_rate) + ' an hour' : '')));

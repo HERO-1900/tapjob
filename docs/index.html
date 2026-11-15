@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TapJob: every job has a hero</title>
+<meta name="description" content="A wrist band that turns what you say at work into a paid bill. Built at VexoHacks 2026 on the Vexo Open band.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --night:#070a16; --ink:#f3f6ff; --soft:rgba(243,246,255,.74); --line:rgba(255,255,255,.14); --go:#25e08a;
+          --display:"Sora", "Helvetica Neue", Arial, sans-serif; --text:"Manrope", "Helvetica Neue", Arial, sans-serif; }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--ink); font:18px/1.55 var(--text);
+         background:radial-gradient(1100px 700px at 8% 4%, rgba(31,79,216,.5), transparent 68%), radial-gradient(900px 620px at 100% 0, rgba(226,59,46,.34), transparent 64%), var(--night); background-color:var(--night); }
+  a { color:inherit; }
+  :focus-visible { outline:3px solid #fff; outline-offset:3px; }
+  .wrap { width:min(1120px, 92vw); margin:0 auto; }
+  header { display:flex; align-items:center; gap:18px; padding:26px 0 0; font:700 15px/1 var(--display); }
+  header strong { font-size:26px; letter-spacing:-.04em; margin-right:auto; }
+  header a { text-decoration:none; opacity:.85; }
+  .button { display:inline-block; padding:13px 22px; border-radius:999px; text-decoration:none; font:700 16px/1 var(--display); color:#0b1020; background:#fff; }
+  .button.line { background:transparent; color:var(--ink); border:1px solid rgba(255,255,255,.35); }
+  h1 { margin:64px 0 18px; font:800 clamp(46px, 8vw, 104px)/.94 var(--display); letter-spacing:-.055em; max-width:11ch; }
+  .lede { max-width:56ch; font-size:21px; color:var(--soft); margin:0 0 30px; }
+  .calls { display:flex; flex-wrap:wrap; gap:12px; }
+  .posters { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:18px; margin:64px 0 0; }
+  .poster { margin:0; border-radius:26px; overflow:hidden; background:var(--c); color:#0b1020; box-shadow:0 34px 60px -30px #000; }
+  .poster b { display:block; padding:18px 18px 0; min-height:74px; font:800 25px/.95 var(--display); letter-spacing:-.045em; text-transform:uppercase; }
+  .poster img { display:block; width:100%; height:auto; }
+  .poster figcaption { padding:14px 18px 18px; background:#0e1326; color:var(--ink); }
+  .poster figcaption strong { display:block; font:800 21px/1.1 var(--display); letter-spacing:-.035em; }
+  .poster figcaption span { font-size:15px; color:var(--soft); }
+  h2 { margin:110px 0 26px; font:800 clamp(30px, 4.4vw, 52px)/1 var(--display); letter-spacing:-.045em; max-width:18ch; }
+  .steps { list-style:none; margin:0; padding:0; counter-reset:n; display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:14px; }
+  .steps li { counter-increment:n; padding:20px 18px 22px; border:1px solid var(--line); border-radius:22px; background:linear-gradient(165deg, rgba(255,255,255,.09), rgba(255,255,255,.02)); }
+  .steps li::before { content:counter(n); display:grid; place-items:center; width:34px; height:34px; margin-bottom:14px; border-radius:50%; background:#fff; color:#0b1020; font:800 16px/1 var(--display); }
+  .steps strong { display:block; font:700 18px/1.2 var(--display); letter-spacing:-.02em; margin-bottom:6px; }
+  .steps span { font-size:15.5px; color:var(--soft); }
+  .rules { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:34px; }
+  .rules h3 { margin:0 0 8px; font:700 22px/1.15 var(--display); letter-spacing:-.03em; }
+  .rules p { margin:0; color:var(--soft); font-size:16.5px; }
+  .shot { display:block; width:100%; border-radius:26px; border:1px solid var(--line); box-shadow:0 50px 90px -40px #000; }
+  .try { display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:start; }
+  pre { margin:0; padding:20px 22px; border-radius:20px; border:1px solid var(--line); background:rgba(0,0,0,.4); font:500 14.5px/1.7 ui-monospace, Menlo, monospace; overflow:auto; }
+  .made { display:flex; flex-wrap:wrap; gap:10px; margin:0; padding:0; list-style:none; }
+  .made li { padding:8px 16px; border:1px solid var(--line); border-radius:999px; font:600 15px/1 var(--display); }
+  footer { margin:110px 0 0; padding:26px 0 44px; border-top:1px solid var(--line); color:var(--soft); font-size:15px; }
+  @media (max-width: 900px) { .posters { grid-template-columns:repeat(2, minmax(0,1fr)); } .steps { grid-template-columns:1fr 1fr; } .rules, .try { grid-template-columns:1fr; } h1 { margin-top:44px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <strong>TapJob</strong>
+    <a href="#how">How it works</a>
+    <a href="#try">Try it</a>
+    <a class="button" href="https://github.com/HERO-1900/tapjob">Code on GitHub</a>
+  </header>
+
+  <h1>Every job has a hero.</h1>
+  <p class="lede">TapJob is a wrist band that turns what you say at work into a paid bill. Double-tap, say what you did or what was ordered, raise your fist. The customer gets a payment page and the band turns green when they pay. No phone in your hand, no register.</p>
+  <div class="calls">
+    <a class="button" href="#try">Try it on your laptop</a>
+    <a class="button line" href="#how">See the five steps</a>
+  </div>
+
+  <div class="posters">
+    <figure class="poster" style="--c:rgb(212,107,90)"><b>Plumber</b><img src="heroes/plumber.jpg" alt="A toy figure of a plumber with a big pipe wrench, one fist raised, a glowing band on the wrist"><figcaption><strong>Leakbreaker</strong><span>Parts and hours. Hours you did not say are timed by the band.</span></figcaption></figure>
+    <figure class="poster" style="--c:rgb(245,218,137)"><b>Drive-through order taker</b><img src="heroes/drive-through.jpg" alt="A toy figure on roller skates carrying a tray with a burger, fries and a shake"><figcaption><strong>Lane Captain</strong><span>Hears the whole car and rings it up from the menu.</span></figcaption></figure>
+    <figure class="poster" style="--c:rgb(89,170,167)"><b>Massage therapist</b><img src="heroes/massage.jpg" alt="A toy figure in a wrap tunic with warm stones floating above one palm"><figcaption><strong>Knot Tamer</strong><span>Sessions and add-ons, settled hands-free.</span></figcaption></figure>
+    <figure class="poster" style="--c:rgb(222,133,93)"><b>Auto mechanic</b><img src="heroes/mechanic.jpg" alt="A toy figure of a mechanic holding an impact wrench, one foot on a stack of tyres"><figcaption><strong>Torque Titan</strong><span>Parts from the price list, labor by the bay clock.</span></figcaption></figure>
+  </div>
+
+  <h2 id="how">Five steps, all from the wrist</h2>
+  <ol class="steps">
+    <li><strong>Double-tap the band</strong><span>It listens while you work. Its light is blue, so people nearby can see the microphone is on.</span></li>
+    <li><strong>Say it</strong><span>"Two double cheeseburgers, one fries, a diet soda and a shake." No prices.</span></li>
+    <li><strong>Double-tap again</strong><span>The words become a ticket. Every price comes from your own price list.</span></li>
+    <li><strong>Raise your fist</strong><span>Hold it up for a second, or double-tap. A Stripe invoice goes out with a payment page and a code to scan.</span></li>
+    <li><strong>Get paid</strong><span>The customer pays on their own phone. The band turns green.</span></li>
+  </ol>
+
+  <h2>The model never touches the money</h2>
+  <div class="rules">
+    <div><h3>Prices are looked up, not guessed</h3><p>Gemini only matches what you said to names on your price list. The price, the quantities and the total are computed in plain code, and the ticket marks every line that came from the list.</p></div>
+    <div><h3>Any job, from one sentence</h3><p>Type "I fix rockets on the launch pad". Gemini writes the card and a starter price list, and paints the hero. Paste or upload your own menu whenever you like.</p></div>
+    <div><h3>A person confirms before a bill is sent</h3><p>The ticket is shown and read back first. Only the raised fist, a double-tap or the Send button creates the invoice. Stripe test mode only in this build.</p></div>
+  </div>
+
+  <h2>One page, in the colours of whoever wears the band</h2>
+  <img class="shot" src="cards.jpg" alt="The TapJob page: a row of poster cards, one hero for each job">
+
+  <h2 id="try">Try it</h2>
+  <div class="try">
+    <div>
+      <p class="lede" style="font-size:19px">The band talks to a small program on your own laptop, so the live version runs there, not on this site. Without a band, the pretend one runs the whole loop in half a minute.</p>
+      <ul class="made"><li>Vexo Open band</li><li>Deepgram</li><li>Gemini 4</li><li>Stripe</li></ul>
+    </div>
+    <pre>git clone https://github.com/HERO-1900/tapjob
+cd tapjob
+git clone https://github.com/VexoAI-Org/vexo-open-kit.git
+
+python3 app.py --sim --demo   # no band, no keys: ends with PAID
+python3 app.py --sim          # drive it yourself in the browser
+python3 app.py 42             # with your band (42 = its number)</pre>
+  </div>
+
+  <footer>Built at VexoHacks, Y Combinator, San Francisco, 14 November 2026. The figures are original characters painted by Gemini's image model from each job's own description.</footer>
+</div>
+</body>
+</html>
