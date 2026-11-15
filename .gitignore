@@ -8,3 +8,6 @@ __pycache__/
 .DS_Store
 recording.ogg
 .venv/
+
+# hero pictures painted by the image model (made on each machine)
+static/heroes/

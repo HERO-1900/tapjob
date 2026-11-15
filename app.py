@@ -38,6 +38,7 @@ from vexo_open.transports.sim import SimTransport        # noqa: E402
 
 import billing                                           # noqa: E402
 import roles
+import art
 import brain                                             # noqa: E402
 import keys                                              # noqa: E402
 import link                                              # noqa: E402
@@ -116,6 +117,10 @@ class Hub:
                 known["id"] = str(kept["id"])[:60]
                 self.roles.append(known)
             self.role = known
+        for role in self.roles:
+            role["art"] = art.url(role)      # the painted picture, if there is one from before
+        self.to_paint = queue.Queue()        # jobs waiting for their picture (one painter, off the main loop)
+        threading.Thread(target=self.painter, daemon=True).start()
         self.face = None                     # which side of the band points up (from its orientation events)
         self.face_at = 0.0
         self.teach_at = 0.0                  # when to read the face for "this is my raised fist"
@@ -128,6 +133,7 @@ class Hub:
             "log": [], "services": {"speech": "off", "brain": brain.provider(), "billing": self.biller.label},
             "business": self.role["business"], "role": self.role, "roles": self.roles, "making_role": False,
             "face": None, "raise_face": config.get("raise_face") or "", "teaching": False,
+            "samples": roles.SAMPLES, "painting": [],
         }
 
     # ---- small helpers -------------------------------------------------------------------
@@ -354,9 +360,43 @@ class Hub:
         self.role = role
         self.set(role=role, roles=self.roles, business=role["business"])
         self.remember(role=role)
+        self.paint(role)
         self.note("Now wearing the band: %s, %s at %s (%d prices on the list)." % (
             role["hero"], role["title"], role["business"], len(role["price_list"])))
         self.say("%s. Ready." % role["hero"])
+
+    def painter(self):
+        """Its own thread: asks the image model for one picture at a time, never holds up the band."""
+        while True:
+            role = self.to_paint.get()
+            try:
+                where = art.paint(role, note=self.note)
+            except Exception as problem:                     # a picture must never stop a job
+                self.note("Picture: %s" % str(problem)[:160])
+                where = None
+            self.inbox.put(("art", (role["id"], where)))
+
+    def paint(self, role):
+        if role.get("art") or not os.environ.get("GEMINI_API_KEY") or role["id"] in self.state["painting"]:
+            return
+        self.set(painting=self.state["painting"] + [role["id"]])
+        self.to_paint.put(dict(role))
+
+    def use_prices(self, value):
+        """The wearer's own menu or price list, pasted on the page."""
+        if self.state["phase"] != "idle":
+            self.note("Finish or discard this job before changing the price list.")
+            return
+        rows = roles.read_prices((value or {}).get("text") if isinstance(value, dict) else value, note=self.note)
+        if not rows:
+            self.note("No prices found in that text. One item per line works: name, price.")
+            self.say("I found no prices in that.")
+            return
+        self.role["price_list"] = rows
+        self.set(role=self.role, roles=self.roles)
+        self.remember(role=self.role)
+        self.note("Price list saved for %s: %d items." % (self.role["business"], len(rows)))
+        self.say("Price list saved. %d items." % len(rows))
 
     def remember(self, **settings):
         """Kept in config.json for the next start (the file is not in git)."""
@@ -377,6 +417,12 @@ class Hub:
             if not self.face:
                 self.note("The band has not said which way it points yet. Move your arm, then teach again.")
                 self.say("I could not feel the band. Try again.")
+                return
+            if now - self.face_at < 0.8 or self.face == getattr(self, "teach_from", None):
+                self.note("Not learned: the band pointed %s up %s. Point the fist straight up, hold it still, "
+                          "and teach again." % (self.face, "the whole time, the same as before"
+                                                if self.face == getattr(self, "teach_from", None) else "only just now"))
+                self.say("I did not get that. Fist straight up, hold still, and teach again.")
                 return
             self.config["raise_face"] = self.face
             self.set(raise_face=self.face)
@@ -420,9 +466,18 @@ class Hub:
             self.face, self.face_at = str(value), time.time()
             self.set(face=self.face)
         elif kind == "teach-raise":
-            self.teach_at = time.time() + 3.0
+            self.teach_at = time.time() + 5.0
+            self.teach_from = self.face                      # how the band lies before the fist goes up
             self.set(teaching=True)
             self.say("Raise your fist to the sky and hold it.")
+        elif kind == "prices":
+            self.use_prices(value)
+        elif kind == "art" and value:
+            number, where = value
+            for role in self.roles:
+                if role["id"] == number and where:
+                    role["art"] = where
+            self.set(roles=self.roles, role=self.role, painting=[n for n in self.state["painting"] if n != number])
         elif kind == "demo-pay" and value:
             self.paid_demo.add(value)
             self.next_poll = 0
@@ -461,6 +516,8 @@ class Hub:
         band.configure(events=True, activity=True)
         self.reset()
         self.note("Connected to %s. Double-tap the band to start a job." % band.name)
+        for role in [self.role] + [r for r in self.roles if r is not self.role]:
+            self.paint(role)                                 # pictures for the cards, the wearer's first
         end = time.time() + seconds if seconds else None
         while band.connected or getattr(band, "reconnecting", False):
             band.wait(0.2)

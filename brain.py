@@ -219,7 +219,7 @@ def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print, r
 
     rate = float((role or {}).get("labor_rate") or config["labor_rate"])
     bills_labor = role is None or bool(role.get("bills_labor"))
-    warnings, items = [], []
+    warnings, items, unpriced = [], [], []
     for part in found.get("parts") or []:
         description = str(part.get("description") or "").strip()[:200]
         if not description:
@@ -244,10 +244,12 @@ def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print, r
             if price is None:
                 price, source = listed[1], "price list"
         if price is None:
-            warnings.append("No price was said for: %s. It is on the invoice at $0, fix it before you send." % description)
+            unpriced.append(description)
         items.append({"description": description, "quantity": quantity, "unit_price": price,
                       "amount": round(quantity * (price or 0), 2), "source": source})
 
+    if unpriced:
+        warnings.append("No price for: %s. On the ticket at $0: fix it before you send." % ", ".join(unpriced))
     labor = None
     if bills_labor:
         hours = found.get("labor_hours")

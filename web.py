@@ -3,6 +3,7 @@ Only this computer can open it (it listens on 127.0.0.1). Standard library only.
 """
 import html
 import json
+import re
 import threading
 
 import keys
@@ -10,7 +11,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 PAGE = Path(__file__).resolve().parent / "static" / "index.html"
-ACTIONS = {"page-tap", "send", "discard", "say", "role", "teach-raise"}
+import art
+
+ACTIONS = {"page-tap", "send", "discard", "say", "role", "teach-raise", "prices"}
 
 
 def start(hub, port):
@@ -43,6 +46,13 @@ def start(hub, port):
                 self.reply(200, json.dumps(hub.snapshot()), "application/json")
             elif path.startswith("/pay/"):
                 self.reply(200, pay_page(hub, path[5:]))
+            elif re.match(r"^/heroes/[a-z0-9-]+\.png$", path):       # a hero's picture, painted once
+                file = art.FOLDER / path[8:]
+                if file.is_file():
+                    data = file.read_bytes()
+                    self.reply(200, data, art.kind(data))
+                else:
+                    self.reply(404, "Not painted yet.")
             else:
                 self.reply(404, "Not here.")
 
@@ -50,7 +60,7 @@ def start(hub, port):
             if not self.same_site():
                 return self.reply(403, "No.")
             path = self.path.split("?", 1)[0]
-            size = min(int(self.headers.get("Content-Length") or 0), 10000)
+            size = min(int(self.headers.get("Content-Length") or 0), 60000)
             raw = self.rfile.read(size) if size else b""
             if path == "/action":
                 try:

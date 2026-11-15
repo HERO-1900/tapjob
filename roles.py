@@ -59,6 +59,16 @@ PRESETS = [
     },
 ]
 
+# Made-up menus to try the price list with. Paste your own in their place.
+SAMPLES = {
+    "Burger stand": "Hamburger, 4.50\nCheeseburger, 5.00\nDouble cheeseburger, 6.90\nFries, 2.80\nShake, 3.60\n"
+                    "Soda, 2.40\nDiet soda, 2.40\nLemonade, 2.60",
+    "Boba tea shop": "Classic milk tea, 5.50\nBrown sugar boba, 6.25\nMatcha latte, 6.00\nMango green tea, 5.75\n"
+                     "Taro smoothie, 6.50\nExtra boba, 0.75\nCheese foam, 1.00",
+    "Sushi bar": "Salmon nigiri, 7.00\nTuna nigiri, 8.00\nCalifornia roll, 9.00\nSpicy tuna roll, 11.00\n"
+                 "Miso soup, 3.50\nEdamame, 5.00\nGreen tea, 3.00",
+}
+
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
@@ -103,7 +113,7 @@ def clean(raw, fallback_title="My job"):
         "emoji": text("emoji", "⭐", 8), "suit": color("suit", "#1f4fd8"), "cape": color("cape", "#e23b2e"),
         "gear": gear if gear in GEARS else "none",
         "bills_labor": bool(raw.get("bills_labor")) and rate > 0, "labor_rate": rate,
-        "price_list": prices[:12], "sample": text("sample", "", 220),
+        "price_list": prices[:80], "sample": text("sample", "", 220),
     }
 
 
@@ -210,3 +220,55 @@ def invent(sentence, note=print):
     role = clean(raw, fallback_title=sentence[:48])
     role["id"] = "my-" + role["id"]
     return role
+
+
+def parse_prices(text):
+    """([name, price] rows, lines that were not understood) from 'name, 4.50' lines."""
+    rows, missed = [], 0
+    for line in str(text or "").splitlines():
+        line = line.strip(" \t-•*|")
+        if not line:
+            continue
+        found = re.match(r"^(.*?)[\s,:;|.·…-]*\$?\s*(\d+(?:[.,]\d{1,2})?)\s*(?:usd|dollars?)?\s*$", line, re.I)
+        name = found.group(1).strip(" ,:;|.-") if found else ""
+        if name and re.search(r"[A-Za-z\u4e00-\u9fff]", name):
+            rows.append([name[:60], float(found.group(2).replace(",", "."))])
+        else:
+            missed += 1
+    return rows, missed
+
+
+PRICES = ("This is a menu or price list pasted by a business, in any layout. Return every item that has a "
+          "price, with the price as a plain number. Skip headings, descriptions and anything without a price. "
+          "Never invent an item or a price.")
+PRICES_SCHEMA = {"type": "OBJECT", "properties": {"items": {"type": "ARRAY", "items": {
+    "type": "OBJECT", "properties": {"name": {"type": "STRING"}, "price": {"type": "NUMBER"}},
+    "required": ["name", "price"]}}}, "required": ["items"]}
+
+
+def read_prices(text, note=print):
+    """A price list from whatever was pasted. Plain 'name, price' lines are read in code; a
+    messier menu goes to Gemini to be laid out, and every row is still checked here."""
+    text = str(text or "")[:20000]
+    rows, missed = parse_prices(text)
+    if (not rows or missed > len(rows)) and os.environ.get("GEMINI_API_KEY") and text.strip():
+        try:
+            model = os.environ.get("GEMINI_MODEL", "gemini-4-hydrogen")
+            body = json.dumps({
+                "systemInstruction": {"parts": [{"text": PRICES}]},
+                "contents": [{"role": "user", "parts": [{"text": text}]}],
+                "generationConfig": {"responseMimeType": "application/json", "responseSchema": PRICES_SCHEMA},
+            }).encode("utf-8")
+            request = urllib.request.Request(
+                "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent" % model,
+                data=body, method="POST",
+                headers={"Content-Type": "application/json", "x-goog-api-key": os.environ["GEMINI_API_KEY"]})
+            with urllib.request.urlopen(request, timeout=60, context=ssl.create_default_context()) as answer:
+                data = json.loads(answer.read().decode("utf-8"))
+            found = json.loads("".join(part.get("text", "") for part in data["candidates"][0]["content"]["parts"]
+                                       if not part.get("thought")))
+            rows = [[row.get("name"), row.get("price")] for row in found.get("items") or []]
+        except Exception as problem:
+            note("Gemini could not lay out that menu (%s). Using the lines that read as 'name, price'." %
+                 str(problem)[:140])
+    return clean({"price_list": rows})["price_list"]
