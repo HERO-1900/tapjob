@@ -252,17 +252,20 @@
   }
   /* a painted hero, when there is one */
   .art { position:relative; }
-  .art img { display:block; width:100%; height:100%; object-fit:contain; border-radius:18px; background:#070a16; }
-  [data-look="stage"] .art img { background:none; border-radius:0; -webkit-mask-image:radial-gradient(ellipse 58% 60% at 50% 50%, #000 68%, transparent 100%); mask-image:radial-gradient(ellipse 58% 60% at 50% 50%, #000 68%, transparent 100%); }
-  [data-look="stage"] .me .art img { transform:scale(1.18); transform-origin:50% 60%; }
-  .card .art img { border-radius:0; object-fit:cover; }
+  .art img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 46%; border-radius:18px; background:#070a16; }
+  [data-look="stage"] .art img { background:none; border-radius:0; -webkit-mask-image:radial-gradient(ellipse 74% 76% at 50% 50%, #000 58%, transparent 100%); mask-image:radial-gradient(ellipse 74% 76% at 50% 50%, #000 58%, transparent 100%); }
+  .me .art:has(img) { width:150px; height:172px; }
+  [data-look="stage"] .me .art:has(img) { width:214px; height:214px; margin:-10px 0 -6px -12px; }
+  .card .art:has(img) { padding:0; }
+  .card .art img { border-radius:0; -webkit-mask-image:none; mask-image:none; }
   i.led { position:absolute; right:6px; top:6px; width:13px; height:13px; border-radius:50%; background:currentColor; box-shadow:0 0 0 2px rgba(0,0,0,.35), 0 0 10px currentColor, 0 0 22px currentColor; }
   .painting { position:absolute; left:0; bottom:0; font:600 11px/1.2 var(--print); opacity:.75; }
 
   /* the wearer's price list, under what the band heard */
   .plist { flex:none; margin-top:12px; padding-top:10px; border-top:1px solid color-mix(in srgb, currentColor 22%, transparent); }
-  .plist header { display:flex; align-items:center; gap:10px; margin-bottom:7px; font:600 15px/1.2 var(--print); }
-  .plist header span { opacity:.7; font-weight:500; }
+  .plist header { display:flex; align-items:center; gap:10px; margin-bottom:7px; font:600 15px/1.2 var(--print); white-space:nowrap; }
+  .plist header button { flex:none; }
+  .plist header span { opacity:.7; font-weight:500; overflow:hidden; text-overflow:ellipsis; }
   .plist header button { margin-left:auto; }
   #plchips { display:flex; flex-wrap:wrap; gap:6px; max-height:58px; overflow:hidden; }
   #plchips span { padding:3px 9px; border-radius:99px; font:500 13px/1.3 var(--print); border:1px solid color-mix(in srgb, currentColor 30%, transparent); white-space:nowrap; }
@@ -322,7 +325,7 @@
     <h2>What the band heard</h2>
     <div id="words" aria-live="polite"></div>
     <div class="plist">
-      <header><b>Price list</b><span id="plcount"></span><button class="small" id="pledit">Edit or upload</button></header>
+      <header><b>Price list</b><span id="plcount"></span><button class="small" id="pledit">Edit or upload yours</button></header>
       <div id="plchips"></div>
     </div>
     <details class="typing">
@@ -562,7 +565,7 @@ function drawRole(s) {
   if (chipStamp !== $('plchips').dataset.stamp) {
     $('plchips').dataset.stamp = chipStamp; $('plchips').replaceChildren();
     for (const [name, price] of prices.slice(0, 14)) { const chip = el('span', name); chip.append(el('b', money(price))); $('plchips').append(chip); }
-    $('plcount').textContent = prices.length ? prices.length + ' items, looked up in code when you name one' : 'empty: say each price out loud, or add your menu';
+    $('plcount').textContent = prices.length ? prices.length + ' items, priced in code' : 'empty: add your menu';
     if (wasSaving) { wasSaving = false; $('prices').close(); }
   }
   if (!$('plsamples').children.length) for (const name of Object.keys(s.samples || {})) {
