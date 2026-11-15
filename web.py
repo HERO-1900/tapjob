@@ -13,7 +13,7 @@ from pathlib import Path
 PAGE = Path(__file__).resolve().parent / "static" / "index.html"
 import art
 
-ACTIONS = {"page-tap", "send", "discard", "say", "role", "teach-raise", "prices"}
+ACTIONS = {"page-tap", "send", "discard", "say", "role", "teach-raise", "prices", "figure"}
 
 
 def start(hub, port):

@@ -250,16 +250,19 @@
     main { grid-template-columns:1fr; } .keys { grid-template-columns:1fr; } .acts { margin-top:14px; } .steps { flex-wrap:wrap; gap:6px 0; }
     #words { min-height:120px; } .ticket { overflow:visible; }
   }
-  /* a painted hero, when there is one */
+  /* a painted hero, when there is one: a poster, the figure with the job in big letters */
   .art { position:relative; }
-  .art img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 46%; border-radius:18px; background:#070a16; }
-  [data-look="stage"] .me .art img { border-radius:30px; box-shadow:0 0 0 2px color-mix(in srgb, var(--cape) 75%, #fff), 0 0 46px -6px var(--cape), 0 24px 40px -18px #000; }
-  .me .art:has(img) { width:150px; height:172px; }
-  [data-look="stage"] .me .art:has(img) { width:196px; height:196px; margin:0 0 12px 2px; }
-  .card .art:has(img) { padding:0; }
-  .card .art img { border-radius:0; -webkit-mask-image:none; mask-image:none; }
-  i.led { position:absolute; right:10px; top:10px; width:13px; height:13px; border-radius:50%; background:currentColor; box-shadow:0 0 0 2px rgba(0,0,0,.35), 0 0 10px currentColor, 0 0 22px currentColor; }
-  .painting { position:absolute; left:0; bottom:0; font:600 11px/1.2 var(--print); opacity:.75; }
+  .art img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 60%; border-radius:22px; background:#070a16; }
+  .me .art:has(img) { width:190px; height:214px; }
+  [data-look="stage"] .me .art:has(img) { width:216px; height:236px; margin:0 0 12px 0; }
+  [data-look="stage"] .me .art img { box-shadow:0 0 0 2px rgba(255,255,255,.85), 0 0 50px -8px var(--cape), 0 26px 44px -18px #000; }
+  .shout { position:absolute; left:14px; top:12px; right:36px; font:800 23px/.95 "Sora", var(--display); letter-spacing:-.04em; text-transform:uppercase; color:#0b1020; overflow-wrap:anywhere; }
+  .card .art:has(img) { padding:0; height:230px; }
+  .card .art img { border-radius:0; }
+  .card .shout { font-size:22px; }
+  i.led { position:absolute; right:12px; top:12px; width:13px; height:13px; border-radius:50%; background:currentColor; box-shadow:0 0 0 2px rgba(0,0,0,.45), 0 0 10px currentColor, 0 0 22px currentColor; }
+  .painting { position:absolute; left:0; bottom:-16px; font:600 11px/1.2 var(--print); opacity:.75; white-space:nowrap; }
+  .figure { display:flex; align-items:center; gap:8px; margin:0 0 14px; font:600 15px/1.2 var(--print); }
 
   /* the wearer's price list, under what the band heard */
   .plist { flex:none; margin-top:12px; padding-top:10px; border-top:1px solid color-mix(in srgb, currentColor 22%, transparent); }
@@ -360,6 +363,7 @@
   <button class="small shut" id="shut">Close</button>
   <h2 id="jobstitle">Every job has a hero</h2>
   <p>Pick who is wearing the band today. The card brings its own price list.</p>
+  <div class="figure"><span>Paint the heroes as</span><span id="figures"></span></div>
   <div class="cards" id="cards"></div>
   <form class="invent" id="invent">
     <label for="sentence">Not here? Describe your job in one sentence</label>
@@ -456,7 +460,7 @@ function heroSVG(role, withLed) {
 }
 
 const heroHTML = (role, withLed) => role.art
-  ? '<img src="' + esc(role.art) + '" alt="' + esc(role.hero || 'Hero') + '">' + (withLed ? '<i class="led"></i>' : '')
+  ? '<img src="' + esc(role.art) + '" alt="' + esc(role.hero || 'Hero') + '"><b class="shout">' + esc(role.title || '') + '</b>' + (withLed ? '<i class="led"></i>' : '')
   : heroSVG(role, withLed);
 
 /* ---- buttons ---- */
@@ -555,6 +559,13 @@ function drawRole(s) {
     waitingForCard = null; $('making').textContent = ''; $('make').disabled = false; $('sentence').value = ''; $('jobs').close();
   } else if (waitingForCard !== null && s.making_role) { $('making').textContent = 'Making your hero…'; }
   shownRoles = all.length;
+  if ($('figures').dataset.stamp !== s.figure) {
+    $('figures').dataset.stamp = s.figure; $('figures').replaceChildren();
+    for (const [value, label] of [['person', 'either'], ['woman', 'women'], ['man', 'men']]) {
+      const pick = el('button', label, 'small' + (s.figure === value ? ' solid' : '')); pick.type = 'button';
+      pick.onclick = () => post('figure', value); $('figures').append(pick, ' ');
+    }
+  }
   const busy = s.phase !== 'idle';
   if (waitingForCard === null) $('making').textContent = busy ? 'Finish or discard the current job first, then pick or make a card.' : '';
   $('make').disabled = busy || waitingForCard !== null; $('plsave').disabled = busy;

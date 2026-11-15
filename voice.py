@@ -53,7 +53,7 @@ def _say(text):
     if not shutil.which("say"):
         return False
     try:
-        subprocess.run(["say", text], timeout=60, check=False)
+        subprocess.run(["say", "-r", "215", text], timeout=60, check=False)
         return True
     except Exception:
         return False

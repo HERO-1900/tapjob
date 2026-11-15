@@ -116,9 +116,13 @@ class Hub:
                 known = roles.clean(kept)
                 known["id"] = str(kept["id"])[:60]
                 self.roles.append(known)
+            elif kept.get("price_list"):                             # a ready-made job with the wearer's own menu
+                known["price_list"] = roles.clean(kept)["price_list"]
             self.role = known
+        self.figure = config.get("figure") if config.get("figure") in art.FIGURES else "person"
         for role in self.roles:
-            role["art"] = art.url(role)      # the painted picture, if there is one from before
+            role["art"] = art.url(role, self.figure)         # the painted picture, if there is one from before
+            role["backdrop"] = art.backdrop(role)
         self.to_paint = queue.Queue()        # jobs waiting for their picture (one painter, off the main loop)
         threading.Thread(target=self.painter, daemon=True).start()
         self.face = None                     # which side of the band points up (from its orientation events)
@@ -133,7 +137,7 @@ class Hub:
             "log": [], "services": {"speech": "off", "brain": brain.provider(), "billing": self.biller.label},
             "business": self.role["business"], "role": self.role, "roles": self.roles, "making_role": False,
             "face": None, "raise_face": config.get("raise_face") or "", "teaching": False,
-            "samples": roles.SAMPLES, "painting": [],
+            "samples": roles.SAMPLES, "painting": [], "figure": self.figure,
         }
 
     # ---- small helpers -------------------------------------------------------------------
@@ -280,7 +284,8 @@ class Hub:
         self.set(phase="draft", draft=draft)
         self.draft_at = time.time()
         self.led("#ff9900", "breathe", "draft ready: double-tap to send", period=1500)
-        self.say(brain.read_back(draft) + " Double tap to send it.")
+        self.say(brain.read_back(draft) + (" Fist up, or double tap, to send." if self.config.get("raise_face")
+                                           else " Double tap to send."))
 
     def send_invoice(self):
         draft = self.state["draft"]
@@ -354,6 +359,7 @@ class Hub:
                 taken = {r["id"] for r in self.roles}
                 while role["id"] in taken:
                     role["id"] += "-2"
+                role["backdrop"] = art.backdrop(role)
                 self.roles.append(role)
         if not role:
             return
@@ -368,19 +374,31 @@ class Hub:
     def painter(self):
         """Its own thread: asks the image model for one picture at a time, never holds up the band."""
         while True:
-            role = self.to_paint.get()
+            role, figure = self.to_paint.get()
             try:
-                where = art.paint(role, note=self.note)
+                where = art.paint(role, note=self.note, figure=figure)
             except Exception as problem:                     # a picture must never stop a job
                 self.note("Picture: %s" % str(problem)[:160])
                 where = None
-            self.inbox.put(("art", (role["id"], where)))
+            self.inbox.put(("art", (role["id"], where, figure)))
 
     def paint(self, role):
         if role.get("art") or not os.environ.get("GEMINI_API_KEY") or role["id"] in self.state["painting"]:
             return
         self.set(painting=self.state["painting"] + [role["id"]])
-        self.to_paint.put(dict(role))
+        self.to_paint.put((dict(role), self.figure))
+
+    def use_figure(self, value):
+        """Paint the heroes as women, men, or leave it open. Pictures are kept for each choice."""
+        if value not in art.FIGURES:
+            return
+        self.figure = value
+        self.remember(figure=value)
+        for role in self.roles:
+            role["art"] = art.url(role, value)
+        self.set(figure=value, roles=self.roles, role=self.role, painting=[])
+        for role in [self.role] + [r for r in self.roles if r is not self.role]:
+            self.paint(role)
 
     def use_prices(self, value):
         """The wearer's own menu or price list, pasted on the page."""
@@ -472,10 +490,12 @@ class Hub:
             self.say("Raise your fist to the sky and hold it.")
         elif kind == "prices":
             self.use_prices(value)
+        elif kind == "figure":
+            self.use_figure(value)
         elif kind == "art" and value:
-            number, where = value
+            number, where, figure = value
             for role in self.roles:
-                if role["id"] == number and where:
+                if role["id"] == number and where and figure == self.figure:
                     role["art"] = where
             self.set(roles=self.roles, role=self.role, painting=[n for n in self.state["painting"] if n != number])
         elif kind == "demo-pay" and value:

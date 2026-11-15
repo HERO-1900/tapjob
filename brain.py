@@ -279,14 +279,19 @@ def make_draft(words, config, on_site_seconds=0, active_seconds=0, note=print, r
 
 
 def read_back(draft):
-    """One breath, for the ear: the customer, each line, the total."""
-    lines = ["%s for %s." % ("Invoice" if draft.get("labor") else "Order", draft["customer"])]
-    for item in draft["items"]:
-        lines.append("%s, %s." % (item["description"], _spoken(item["amount"]) if item["unit_price"] is not None
-                                  else "no price"))
+    """A few seconds, for the ear: who, how much is on it, the total. The lines are on the screen."""
+    who = draft["customer"] if draft["customer"] != "Customer" else ""
+    lines = [("Invoice" if draft.get("labor") else "Order") + (" for %s." % who if who else ".")]
+    items = draft["items"]
+    if len(items) == 1:
+        lines.append("%s." % items[0]["description"])
+    elif items:
+        lines.append("%d lines." % len(items))
+    if any(item["unit_price"] is None for item in items):
+        lines.append("Some have no price.")
     labor = draft.get("labor")
     if labor:
-        lines.append("Labor %g hours, %s." % (labor["hours"], _spoken(labor["amount"])))
+        lines.append("Labor %g hours." % labor["hours"])
     lines.append("Total %s." % _spoken(draft["total"]))
     return " ".join(lines)
 

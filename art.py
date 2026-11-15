@@ -18,56 +18,86 @@ GEAR = {"cap": "a work cap", "hardhat": "a yellow hard hat", "headset": "a heads
         "headband": "a headband", "goggles": "safety goggles pushed up on the forehead", "none": ""}
 
 
-def _file(role):
-    return FOLDER / (re.sub(r"[^a-z0-9-]+", "-", str(role["id"]).lower()).strip("-")[:60] + ".png")
+STYLE = "toy3"                                  # part of the file name: a new style paints new pictures
+FIGURES = {"woman": "a woman", "man": "a man", "person": "a person"}
 
 
-def url(role):
+def _file(role, figure="person"):
+    name = re.sub(r"[^a-z0-9-]+", "-", str(role["id"]).lower()).strip("-")[:50]
+    return FOLDER / ("%s-%s-%s.png" % (name, STYLE, figure if figure in FIGURES else "person"))
+
+
+def url(role, figure="person"):
     """Where the page finds this job's picture, or None if it has not been painted."""
-    file = _file(role)
+    file = _file(role, figure)
     return "/heroes/%s?v=%d" % (file.name, int(file.stat().st_mtime)) if file.exists() else None
 
 
-def brief(role):
+def backdrop(role):
+    """The poster colour behind the figure: the job's accent colour, lightened."""
+    cape = role.get("cape") or "#e23b2e"
+    parts = [int(cape[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join("%02x" % round(v + (255 - v) * 0.5) for v in parts)
+
+
+def brief(role, figure="person"):
     gear = GEAR.get(role.get("gear"), "")
     return (
-        "Product photo of ONE collectible designer vinyl toy figure: an original hero character whose job is "
-        "%s. Full body, centred, seen from a slightly low heroic angle, standing proud with the right fist "
-        "raised to the sky; on the raised wrist a slim smart wristband with one small glowing light. "
-        "Matte vinyl, big head and small body, a crisp refined work uniform for this job in the colour %s with "
-        "%s accents, a short cape in %s%s. Friendly, confident face. Studio lighting, soft rim light, a faint "
-        "floor reflection. Plain, very dark navy background (colour #070a16), nothing else in the frame. "
-        "No text, no letters, no logos, no brand names, no watermark. Not based on any existing character, "
-        "mascot or toy line." % (role["title"], role["suit"], role["cape"], role["cape"],
-                                 (", wearing " + gear) if gear else ""))
+        "A designer art toy: ONE collectible vinyl figure of an original character, %s whose job is %s. "
+        "Chibi proportions: a very large round head, a small body, chunky shoes; the whole figure is "
+        "visible from the top of the head to the shoes and fills about 85 percent of the picture height, "
+        "centred. %sBig glossy eyes, a small confident smile. A refined miniature work uniform for this job "
+        "in the colour %s with %s details. One fist raised to the sky; on that wrist a slim smart wristband "
+        "with one small glowing light. Smooth matte vinyl with soft highlights, soft studio light, seen "
+        "slightly from below. Background: ONE flat solid colour, %s, no gradient, no props, only a soft "
+        "shadow under the shoes. Portrait picture. No text, no letters, no numbers, no logos, no brand "
+        "names, no watermark. An original design, not based on any existing character, mascot or toy line."
+        % (FIGURES.get(figure, "a person"), role["title"],
+           ("Oversized " + gear[2:] if gear.startswith("a ") else gear.capitalize()) + ". " if gear else "",
+           role["suit"], role["cape"], backdrop(role)))
 
 
-def paint(role, note=print):
+def _ask(model, key, text, shape):
+    setup = {"responseModalities": ["TEXT", "IMAGE"]}
+    if shape:
+        setup["imageConfig"] = {"aspectRatio": "3:4"}
+    body = json.dumps({"contents": [{"role": "user", "parts": [{"text": text}]}],
+                       "generationConfig": setup}).encode("utf-8")
+    request = urllib.request.Request(URL % model, data=body, method="POST",
+                                     headers={"Content-Type": "application/json", "x-goog-api-key": key})
+    with urllib.request.urlopen(request, timeout=120, context=ssl.create_default_context()) as answer:
+        data = json.loads(answer.read().decode("utf-8"))
+    for part in data["candidates"][0]["content"]["parts"]:
+        inline = part.get("inlineData") or part.get("inline_data")
+        if inline and inline.get("data"):
+            return base64.b64decode(inline["data"])
+    return None
+
+
+def paint(role, note=print, figure="person"):
     """Paints the picture and returns its url, or None (and says why)."""
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key:
         return None
-    body = json.dumps({"contents": [{"role": "user", "parts": [{"text": brief(role)}]}],
-                       "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]}}).encode("utf-8")
     models = [os.environ["GEMINI_IMAGE_MODEL"]] if os.environ.get("GEMINI_IMAGE_MODEL") else MODELS
     why = ""
     for model in models:
-        request = urllib.request.Request(URL % model, data=body, method="POST",
-                                         headers={"Content-Type": "application/json", "x-goog-api-key": key})
-        try:
-            with urllib.request.urlopen(request, timeout=120, context=ssl.create_default_context()) as answer:
-                data = json.loads(answer.read().decode("utf-8"))
-            for part in data["candidates"][0]["content"]["parts"]:
-                inline = part.get("inlineData") or part.get("inline_data")
-                if inline and inline.get("data"):
+        for shape in (True, False):                  # ask for a portrait; if that setting is refused, ask plainly
+            try:
+                picture = _ask(model, key, brief(role, figure), shape)
+                if picture:
                     FOLDER.mkdir(parents=True, exist_ok=True)
-                    _file(role).write_bytes(base64.b64decode(inline["data"]))
-                    return url(role)
-            why = "%s gave no picture" % model
-        except urllib.error.HTTPError as problem:
-            why = "%s answered %s: %s" % (model, problem.code, problem.read().decode("utf-8", "replace")[:160])
-        except Exception as problem:
-            why = "%s: %s" % (model, str(problem)[:160])
+                    _file(role, figure).write_bytes(picture)
+                    return url(role, figure)
+                why = "%s gave no picture" % model
+                break
+            except urllib.error.HTTPError as problem:
+                why = "%s answered %s: %s" % (model, problem.code, problem.read().decode("utf-8", "replace")[:160])
+                if problem.code != 400:
+                    break
+            except Exception as problem:
+                why = "%s: %s" % (model, str(problem)[:160])
+                break
     note("No picture for %s (%s). The drawn figure stays." % (role.get("hero", "this job"), why))
     return None
 
