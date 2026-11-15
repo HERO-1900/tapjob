@@ -34,8 +34,13 @@ The page opens on a card for whoever wears the band. Four come ready-made:
 
 **Any job, from one sentence.** Type "I fix rockets on the launch pad": Gemini writes the card
 (job title, hero name, colours, headgear, a starter price list, whether the job bills by the
-hour) and `roles.py` checks every field before it is used. The figure on the card is drawn by
-the page from those fields; no image is generated or downloaded.
+hour) and `roles.py` checks every field before it is used. Gemini's image model then paints
+the hero once, as a collectible figure with the band on a raised fist (`art.py`); until the
+picture arrives, and whenever there is no key, the page shows a figure it draws itself.
+
+**Bring your own price list.** "Edit or upload yours" on the page: paste a menu, pick a text
+file, or try a made-up one (burger stand, boba tea shop, sushi bar). Plain `name, price`
+lines are read in code; a messier menu is laid out by Gemini and each row is checked.
 
 **The price list makes the money traceable.** The worker says "two double cheeseburgers and a
 shake", never a price. Gemini only matches the words to names on the list; the price is then
@@ -96,8 +101,9 @@ Design rules we kept:
 - **Vexo Open band**: double-tap events, orientation events (the raised fist), Opus microphone
   stream, activity stream, LED, over the USB cable or Bluetooth.
 - **Deepgram**: live speech-to-text (through the kit's `speech.py`), text-to-speech for the read-back.
-- **Google Gemini 4** (`gemini-4-hydrogen` by default): structured output twice: words to invoice
-  fields, and one sentence to a job card.
+- **Google Gemini 4** (`gemini-4-hydrogen` by default): structured output three times: words to
+  invoice fields, one sentence to a job card, a pasted menu to a price list. Gemini's image
+  model (`gemini-3.1-flash-image`) paints the hero for each job.
 - **Stripe**: customers, invoice items, invoices, hosted payment page, in test mode.
 
 Not used: Pipecat. The voice loop here is a small state machine of our own.
@@ -158,8 +164,16 @@ loop against the kit's pretend band.
 
 ## What is real and what is not
 
-- Real: the band protocol, the state machine, the draft maths, the Stripe test invoice, the
-  payment check, the green light. Tested against the kit's pretend band.
+- Run end to end on a real band (Vexo-HACK-51, over the USB cable, 14 Nov 2026): double-tap,
+  live speech-to-text, Gemini's draft, a price list order with every line priced in code, a
+  Stripe test invoice, payment with the test card, the PAID state. Also on the real services:
+  a job card from one sentence, and the hero pictures from Gemini's image model.
+- Written today and not yet proven on the wrist: finding the band over Bluetooth with retries
+  (`link.py`; the first Bluetooth try failed while the kit's dashboard held the band), and the
+  raised fist (the band's orientation events arrive; teaching and sending by it were not
+  confirmed before the deadline).
+- Found the hard way: a loudspeaker next to the band can shake it into a double-tap. Taps are
+  ignored while the computer is speaking.
 - Tuned by guess, not measured: the tap sensitivity and the "hands working" motion threshold
   (`config.json`). A loud job site will need a harder tap setting.
 - Not solved: speech recognition next to a compressor; two people talking; parts catalogues
@@ -189,7 +203,8 @@ near you. Saved job records (`jobs/`) stay on this computer and are not committe
 |---|---|
 | `app.py` | The hub: band, state machine, main loop |
 | `brain.py` | Words to fields (Gemini / OpenAI / rules), fields to money |
-| `roles.py` | The jobs: price lists, the card from one sentence, the price lookup |
+| `roles.py` | The jobs: price lists, the card from one sentence, the price lookup, reading a pasted menu |
+| `art.py` | The hero pictures, from Gemini's image model |
 | `billing.py` | Stripe test-mode invoice, or the demo pay page |
 | `voice.py` | Speaks the draft |
 | `web.py`, `static/index.html` | The live page |
