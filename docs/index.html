@@ -123,6 +123,7 @@
   .s-rows em { font:700 .7em/1 var(--display); font-style:normal; padding:.2em .5em; margin-left:.4em; border-radius:99px; background:#dff7ea; color:#12804a; white-space:nowrap; }
   .s-rows em.grey { background:#eef1f8; color:#56618a; }
   .s-rows div.sum { border:0; padding-bottom:0; font:800 1.5em/1.3 var(--display); letter-spacing:-.03em; }
+  .s-pill + .s-pill { margin-top:0; }
   .s-pill { margin-top:auto; padding:.95em; border-radius:99px; text-align:center; font:700 1em/1 var(--display); color:#0b1020; background:#fff; }
   .s-pill.go { background:linear-gradient(135deg, #25e08a, #0f9d58); } .s-pill.line { background:transparent; color:var(--ink); border:1px solid rgba(255,255,255,.4); }
   .s-code { flex:1; min-height:34cqw; border-radius:1.2em; background:#fff conic-gradient(#0b1020 25%, #fff 0 50%, #0b1020 0 75%, #fff 0) 0 0/8.4cqw 8.4cqw; border:3.4cqw solid #fff; }
@@ -176,6 +177,32 @@
   .vision h2 { margin:0 auto 24px; max-width:15ch; font:800 clamp(40px, 6.2vw, 88px)/.98 var(--display); letter-spacing:-.055em; text-wrap:balance; }
   .vision p { max-width:50ch; margin:0 auto; font-size:21px; color:var(--soft); }
 
+  .screen { padding-bottom:17cqw; }
+  .s-tabs { position:absolute; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(4, 1fr); padding:2.6cqw 3cqw 4.4cqw; background:rgba(5,7,15,.86); border-top:1px solid rgba(255,255,255,.1); font:700 .68em/1.2 var(--display); text-align:center; color:rgba(243,246,255,.5); }
+  .s-tabs span::before { content:""; display:block; width:1.9em; height:1.9em; margin:0 auto .35em; border-radius:.6em; background:rgba(255,255,255,.14); }
+  .s-tabs span.on { color:#fff; } .s-tabs span.on::before { background:var(--c); }
+  .s-sub { margin:.2em 0 -.3em; font:700 .76em/1.2 var(--display); color:rgba(243,246,255,.6); }
+  .s-stats { display:grid; grid-template-columns:repeat(3, 1fr); gap:.5em; }
+  .s-stats div { padding:.7em .6em; border-radius:.9em; background:rgba(255,255,255,.08); }
+  .s-stats b { display:block; font:800 1.25em/1 var(--display); letter-spacing:-.03em; } .s-stats span { display:block; margin-top:.35em; font-size:.72em; color:var(--soft); }
+  .s-wave { display:flex; align-items:center; gap:.42em; height:3.4em; padding:0 .2em; }
+  .s-wave i { flex:1; height:22%; border-radius:9px; background:#4d8dff; animation:talk 780ms ease-in-out infinite alternate; }
+  .s-wave i:nth-child(3n) { animation-delay:-260ms; } .s-wave i:nth-child(3n+1) { animation-delay:-520ms; } .s-wave i:nth-child(4n) { animation-duration:560ms; }
+  @keyframes talk { to { height:96%; } }
+  .s-check { align-self:center; display:grid; place-items:center; width:2.1em; height:2.1em; margin:.5em 0 .3em; border-radius:50%; color:#04130b; font:800 2.8em/1 var(--display); background:linear-gradient(135deg, #25e08a, #0f9d58); box-shadow:0 0 0 .5em rgba(37,224,138,.18), 0 0 0 1.1em rgba(37,224,138,.08); }
+  .s-amount { text-align:center; font:800 2.3em/1 var(--display); letter-spacing:-.045em; } .s-amount small { display:block; margin-top:.45em; font:600 .36em/1.3 var(--text); letter-spacing:0; color:var(--soft); }
+  .s-tiles { display:grid; grid-template-columns:repeat(3, 1fr); gap:.5em; }
+  .s-tiles div { padding:.8em .4em .7em; border-radius:.9em; border:1px dashed rgba(255,255,255,.34); text-align:center; font:700 .8em/1.25 var(--display); }
+  .s-tiles i { display:block; margin-bottom:.3em; font:normal 1.7em/1 system-ui; } .s-tiles small { display:block; font:600 .82em/1.2 var(--text); color:var(--soft); }
+  .s-opts div { display:flex; align-items:center; gap:.7em; padding:.72em .8em; margin-bottom:.45em; border-radius:.9em; border:1px solid rgba(255,255,255,.16); font:700 .95em/1.2 var(--display); }
+  .s-opts div.on { border-color:var(--c); background:color-mix(in srgb, var(--c) 16%, transparent); }
+  .s-opts i { font:normal 1.5em/1 system-ui; } .s-opts small { margin-left:auto; font:600 .78em/1 var(--text); color:var(--soft); }
+  .s-qr { align-self:center; width:62%; aspect-ratio:1; padding:3cqw; border-radius:1.1em; background:#fff; } .s-qr img { display:block; width:100%; height:100%; }
+  .voices { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; margin:0 0 10px; }
+  .voices figure { margin:0; padding:24px 26px; border-radius:22px; border:1px solid var(--line); background:linear-gradient(165deg, rgba(255,255,255,.09), rgba(255,255,255,.02)); }
+  .voices blockquote { margin:0 0 12px; font:700 22px/1.3 var(--display); letter-spacing:-.025em; }
+  .voices figcaption { font-size:14.5px; color:var(--soft); } .voices a { color:inherit; }
+
   /* ---- the problem: three notes that never became bills ---- */
   .problem { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:56px; align-items:center; min-height:min(760px, 90vh); padding:90px 0 40px; }
   .problem p { margin:0 0 18px; max-width:46ch; font-size:19.5px; color:rgba(243,246,255,.86); }
@@ -214,8 +241,8 @@
 
   .rise { opacity:0; transform:translateY(22px); transition:opacity 600ms, transform 600ms; }
   .rise.in { opacity:1; transform:none; }
-  @media (max-width: 980px) { .top, .try, .beat, .problem, .hand, .who, .lab { grid-template-columns:1fr; } .beat { gap:30px; min-height:0; padding:70px 0 20px; } .beat.flip .words { order:0; } .problem { min-height:0; } .notes { height:400px; } .notes div { width:210px; font-size:17px; } .dots, .count { display:none; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .rules, .next { grid-template-columns:1fr; } .size { grid-template-columns:1fr 1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
-  @media (prefers-reduced-motion: reduce) { .band.live i { animation:none; height:22px; } .rise { opacity:1; transform:none; transition:none; } .row, .paid, .hero, .phone, body, .dots a { transition:none; } .phone.back { transform:rotate(-4deg); opacity:.94; } .phone.front { transform:translateY(54px) rotate(2.5deg); opacity:1; } html { scroll-behavior:auto; } }
+  @media (max-width: 980px) { .top, .try, .beat, .problem, .hand, .who, .lab { grid-template-columns:1fr; } .beat { gap:30px; min-height:0; padding:70px 0 20px; } .beat.flip .words { order:0; } .problem { min-height:0; } .notes { height:400px; } .notes div { width:210px; font-size:17px; } .dots, .count { display:none; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .rules, .next { grid-template-columns:1fr; } .size { grid-template-columns:1fr 1fr; } .voices { grid-template-columns:1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
+  @media (prefers-reduced-motion: reduce) { .band.live i { animation:none; height:22px; } .s-wave i { animation:none; height:60%; } .rise { opacity:1; transform:none; transition:none; } .row, .paid, .hero, .phone, body, .dots a { transition:none; } .phone.back { transform:rotate(-4deg); opacity:.94; } .phone.front { transform:translateY(54px) rotate(2.5deg); opacity:1; } html { scroll-behavior:auto; } }
 </style>
 </head>
 <body>
@@ -272,6 +299,11 @@
       <div>Mr. Diaz brakes. Send invoice this weekend!!</div>
     </div>
   </section>
+
+  <div class="voices rise">
+    <figure><blockquote>&ldquo;&hellip;in front of a desk trying to push all invoices, quotes, emails, etc.&rdquo;</blockquote><figcaption>A tradesperson on Reddit, <a href="https://www.reddit.com/r/BuildingTrades/comments/1kflown/tradespeople_anyone_else_feel_like/">r/BuildingTrades</a>, May 2025</figcaption></figure>
+    <figure><blockquote>&ldquo;&hellip;really I forgot to ring the food in.&rdquo;</blockquote><figcaption>A server, on what &ldquo;the kitchen lost the ticket&rdquo; means, <a href="https://dailydot.com/?p=1382923">quoted by the Daily Dot</a></figcaption></figure>
+  </div>
 
   <h2 id="does" class="rise">So we put the paperwork on your wrist</h2>
   <p class="lead rise">Every step below ran today on the real band. The phone screens are a design preview of the app, which is not built yet.</p>
@@ -491,28 +523,28 @@ const BEATS = [
   { label: 'Say it', c: 'rgb(245,218,137)', h: 'Hands full? Just say it.', ran: 'Runs on the real band',
     p: 'No phone, no screen, no typing. Double-tap the band and talk while you work.',
     dim: 'It listens only between two double-taps, and its light turns blue so people nearby can see it.',
-    back: [['bar', 'Sunset Drive-In', 'Band 51'], ['poster', 'drive-through', 'Drive-through order taker'], ['name', 'Lane Captain'], ['p', 'Ready. Double-tap the band to start.'], ['pill', 'Change or create job', 'line']],
-    front: [['bar', 'Sunset Drive-In', 'Band 51'], ['phase', 'Listening', 'blue'], ['heard', '“Two double cheeseburgers, one fries, a diet soda and a shake.”'], ['p', 'Double-tap again when you are done.'], ['pill', 'Stop']] },
+    back: [['bar', 'Sunset Drive-In', 'Band 51'], ['poster', 'drive-through', 'Drive-through order taker'], ['name', 'Lane Captain'], ['p', 'Ready. Double-tap the band to start.'], ['sub', 'Today'], ['stats', [['$148.20', 'Paid'], ['$22.60', 'Waiting'], ['7', 'Bills']]], ['tabs', 0]],
+    front: [['bar', 'Sunset Drive-In', 'Band 51'], ['phase', 'Listening', 'blue'], ['wave'], ['heard', '“Two double cheeseburgers, one fries, a diet soda and a shake.”'], ['sub', 'Found on your price list'], ['chips', ['Double cheeseburger × 2', 'Fries', 'Diet soda', 'Shake']], ['pill', 'Double-tap to stop'], ['tabs', 0]] },
   { label: 'It remembers', c: 'rgb(212,107,90)', h: 'Think out loud. Nothing gets forgotten.', ran: 'Runs on the real band',
     p: 'Talk your way through the job: the parts you used, what was ordered, what you fixed. Your words are written down as you say them, and the band times the job.',
     dim: 'Say the hours and they are used. Say nothing and the band’s clock bills them, rounded up to the quarter hour.',
-    back: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['phase', 'Listening', 'blue'], ['clock', '0:40:12', 'on site since the first double-tap'], ['heard', '“Replaced the faucet cartridge and two supply lines.”']],
-    front: [['phase', 'Check it', 'amber'], ['rows', [['Faucet cartridge', '$45.00', 'price list'], ['Supply line × 2', '$24.00', 'price list'], ['Labor 0.75 h at $95/h', '$71.25', 'band clock']], '$140.25'], ['p', 'No hours were said. The band timed 40 minutes on site.'], ['pill', 'Fist up to send', 'go']] },
+    back: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['phase', 'Listening', 'blue'], ['clock', '0:40:12', 'on site since the first double-tap'], ['wave'], ['heard', '“Replaced the faucet cartridge and two supply lines.”'], ['sub', 'Kept so far'], ['list', [['Faucet cartridge', '✓'], ['Supply line × 2', '✓'], ['Time on site', '40 min']]], ['tabs', 0]],
+    front: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['phase', 'Check it', 'amber'], ['rows', [['Faucet cartridge', '$45.00', 'price list'], ['Supply line × 2', '$24.00', 'price list'], ['Labor 0.75 h at $95/h', '$71.25', 'band clock']], '$140.25'], ['p', 'No hours were said. The band timed 40 minutes on site.'], ['pill', 'Fist up to send', 'go'], ['pill', 'Discard', 'line'], ['tabs', 0]] },
   { label: 'Done means paid', c: 'rgb(89,170,167)', h: 'Job done. Bill done.', ran: 'Paid today with Stripe’s test card',
     p: 'No tickets to write up tonight, no forms, no quotes to chase. The bill is ready when you stop talking, and the customer pays on their own phone before you leave.',
     dim: 'It is a Stripe invoice with a payment page and a code to scan. When it is paid, the band turns green.',
-    back: [['name', 'Customer pays here'], ['p', 'They scan it with their own phone. You keep working.'], ['code'], ['pill', 'Waiting for $175.00']],
-    front: [['bar', 'Calm Hands Studio', 'Band 51'], ['stamp', 'PAID'], ['rows', [['90-minute massage', '$150.00', 'price list'], ['Hot stones', '$25.00', 'price list']], '$175.00'], ['p', 'Paid into ipo Lab, Stripe test mode.']] },
+    back: [['bar', 'Calm Hands Studio', 'Band 51'], ['name', 'Customer pays here'], ['qr'], ['amount', '$175.00', 'They scan it with their own phone. You keep working.'], ['pill', 'Waiting for payment'], ['tabs', 0]],
+    front: [['bar', 'Calm Hands Studio', 'Band 51'], ['check', '✓'], ['amount', '$175.00', 'Paid by Ms. Rivera at 5:42 PM'], ['rows', [['90-minute massage', '$150.00', 'price list'], ['Hot stones', '$25.00', 'price list']], '$175.00'], ['p', 'Paid into ipo Lab, Stripe test mode.'], ['pill', 'Next job', 'go'], ['tabs', 0]] },
   { label: 'Your prices', c: 'rgb(245,218,137)', h: 'You name the item. Your price list names the price.', ran: 'Runs on the real band',
-    p: 'Paste your menu or pick a sample. Say an item, never a price: it is looked up in plain code, not guessed by the model.',
-    dim: 'An item that is not on your list goes on the ticket at $0 with a warning.',
-    back: [['name', 'Price list'], ['list', [['Hamburger', '$4.50'], ['Cheeseburger', '$5.00'], ['Double cheeseburger', '$6.90'], ['Fries', '$2.80'], ['Shake', '$3.60'], ['Diet soda', '$2.40']]], ['chips', ['Burger stand', 'Boba tea shop', 'Sushi bar']], ['pill', 'Edit or upload yours', 'line']],
-    front: [['bar', 'Sunset Drive-In', 'Band 51'], ['phase', 'Check it', 'amber'], ['rows', DRIVE, '$22.60'], ['pill', 'Fist up to send', 'go']] },
-  { label: 'No screen to touch', c: 'rgb(222,133,93)', h: 'Ticket looks right? Fist up.', ran: 'Sent bills on the real band today, one over Bluetooth',
-    p: 'The ticket is read back to you. Hold your fist up for a moment and the bill goes out. Your hands never touch a screen.',
-    dim: 'Teach the band your raised fist once. A double-tap or the Send button still works.',
-    back: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['phase', 'Check it', 'amber'], ['rows', PLUMB, '$164.00'], ['pill', 'Fist up to send', 'go']],
-    front: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['big', '✊'], ['phase', 'Sending', 'amber'], ['p', 'Fist held up. Creating the Stripe invoice for $164.00.']] },
+    p: 'Cannot remember every price? You do not have to. Give TapJob your menu once. After that you say the item, never the price: it is looked up in plain code, not guessed by the model.',
+    dim: 'Today you paste the menu or pick a text file. A photo or a PDF of the menu is in the app design, next.',
+    back: [['name', 'Your menu'], ['tiles', [['📷', 'Photo', 'next'], ['📄', 'PDF', 'next'], ['⌨️', 'Paste', 'works today']]], ['sub', '7 items from your menu'], ['list', [['Hamburger', '$4.50'], ['Cheeseburger', '$5.00'], ['Double cheeseburger', '$6.90'], ['Fries', '$2.80'], ['Shake', '$3.60']]], ['chips', ['Burger stand', 'Boba tea shop', 'Sushi bar']], ['tabs', 2]],
+    front: [['bar', 'Sunset Drive-In', 'Band 51'], ['phase', 'Check it', 'amber'], ['rows', DRIVE, '$22.60'], ['p', 'Every price came from your menu. Nothing was guessed.'], ['pill', 'Fist up to send', 'go'], ['pill', 'Discard', 'line'], ['tabs', 0]] },
+  { label: 'No screen to touch', c: 'rgb(222,133,93)', h: 'Greasy fingers? Send it with a fist.', ran: 'Sent bills on the real band today, one over Bluetooth',
+    p: 'The ticket is read back to you. Raise your fist and the bill goes out. It is the fun way, not the only way: a double-tap works too, and the band can learn another pose you find comfortable.',
+    dim: 'You teach the band your move once. Nothing is sent until you make it.',
+    back: [['name', 'How you send'], ['p', 'Pick the move that suits your work.'], ['opts', [['✊', 'Raise your fist', 'on'], ['👆', 'Double-tap', 'on'], ['🙌', 'Your own pose', 'teach it']]], ['sub', 'Why'], ['p', 'So you never touch a screen with wet or dirty hands.'], ['pill', 'Teach a new pose', 'line'], ['tabs', 3]],
+    front: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['big', '✊'], ['phase', 'Sending', 'amber'], ['p', 'Fist held up. Creating the Stripe invoice.'], ['rows', PLUMB, '$164.00'], ['tabs', 0]] },
 ];
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 function posterEl(key, title) {
@@ -531,6 +563,15 @@ function block([kind, a, b]) {
   if (kind === 'code') { const e = el('div', 's-code'); e.setAttribute('role', 'img'); e.setAttribute('aria-label', 'A stand-in for the payment code'); return e; }
   if (kind === 'big') { const e = el('div', 's-big'); e.append(el('span', '', a)); return e; }
   if (kind === 'stamp') return el('div', 's-stamp', a);
+  if (kind === 'sub') return el('div', 's-sub', a);
+  if (kind === 'check') return el('div', 's-check', a);
+  if (kind === 'amount') { const e = el('div', 's-amount', a); e.append(el('small', '', b)); return e; }
+  if (kind === 'wave') { const e = el('div', 's-wave'); e.setAttribute('aria-hidden', 'true'); for (let i = 0; i < 14; i++) e.append(el('i')); return e; }
+  if (kind === 'stats') { const e = el('div', 's-stats'); a.forEach(([value, label]) => { const d = el('div'); d.append(el('b', '', value), el('span', '', label)); e.append(d); }); return e; }
+  if (kind === 'tiles') { const e = el('div', 's-tiles'); a.forEach(([icon, label, note]) => { const d = el('div'); d.append(el('i', '', icon), label, el('small', '', note)); e.append(d); }); return e; }
+  if (kind === 'opts') { const e = el('div', 's-opts'); a.forEach(([icon, label, state]) => { const d = el('div', state === 'on' ? 'on' : ''); d.append(el('i', '', icon), el('span', '', label), el('small', '', state === 'on' ? 'On' : state)); e.append(d); }); return e; }
+  if (kind === 'qr') { const e = el('div', 's-qr'); const img = el('img'); img.alt = 'A code that opens this page, standing in for the payment code'; img.loading = 'lazy'; img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=0&data=' + encodeURIComponent('https://tapjob.ipolab.ai/#live'); e.append(img); return e; }
+  if (kind === 'tabs') { const e = el('div', 's-tabs'); ['Job', 'Dashboard', 'Prices', 'Me'].forEach((t, i) => e.append(el('span', i === a ? 'on' : '', t))); return e; }
   if (kind === 'input') return el('div', 's-input', a);
   if (kind === 'clock') { const e = el('div', 's-clock', a); e.append(el('small', '', b)); return e; }
   if (kind === 'chips') { const e = el('div', 's-chips'); a.forEach((t) => e.append(el('span', '', t))); return e; }
