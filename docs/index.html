@@ -13,6 +13,7 @@
           --display:"Sora", "Helvetica Neue", Arial, sans-serif; --text:"Manrope", "Helvetica Neue", Arial, sans-serif; }
   * { box-sizing:border-box; }
   html { scroll-behavior:smooth; }
+  [id] { scroll-margin-top:92px; }
   body { margin:0; color:var(--ink); font:18px/1.6 var(--text); -webkit-font-smoothing:antialiased; background-color:var(--night);
          background:radial-gradient(1100px 760px at 78% 6%, color-mix(in srgb, var(--c) 34%, transparent), transparent 66%), radial-gradient(900px 700px at 0 0, rgba(31,79,216,.42), transparent 64%), var(--night); transition:background 600ms; }
   a { color:inherit; }
@@ -53,7 +54,7 @@
   .row em.said-it { background:#eef1f8; color:#56618a; }
   .sum { display:flex; justify-content:flex-end; align-items:baseline; gap:12px; padding-top:8px; font:700 13px/1 var(--display); }
   .sum output { font:800 30px/1 var(--display); letter-spacing:-.04em; }
-  .paid { position:absolute; right:14px; bottom:54px; padding:8px 18px 7px; border-radius:14px; color:#fff; background:linear-gradient(135deg, #25e08a, #0f9d58); font:800 30px/1 var(--display);
+  .paid { position:absolute; left:16px; bottom:12px; padding:8px 18px 7px; border-radius:14px; color:#fff; background:linear-gradient(135deg, #25e08a, #0f9d58); font:800 25px/1 var(--display);
           transform:rotate(-9deg) scale(0); opacity:0; transition:transform 300ms cubic-bezier(.2,1.6,.4,1), opacity 200ms; box-shadow:0 14px 30px -8px #12a85c; }
   .paid.on { transform:rotate(-9deg) scale(1); opacity:1; }
   .note { margin:10px 0 0; font:600 12.5px/1.4 var(--display); opacity:.7; }
@@ -83,32 +84,100 @@
   .own p { margin:0; font-size:17px; color:var(--soft); } .own p b { color:var(--ink); }
   .own kbd { font:600 15px/1.5 ui-monospace, Menlo, monospace; padding:6px 12px; border-radius:10px; background:rgba(0,0,0,.4); border:1px solid var(--line); white-space:nowrap; }
 
-  /* ---- what it does, one by one ---- */
-  .features { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
-  .feature { padding:24px 24px 26px; border:1px solid var(--line); border-radius:24px; background:linear-gradient(165deg, rgba(255,255,255,.08), rgba(255,255,255,.015)); }
-  .feature i { display:grid; place-items:center; width:46px; height:46px; margin-bottom:16px; border-radius:14px; font:normal 24px/1 system-ui; background:color-mix(in srgb, var(--c) 30%, rgba(255,255,255,.08)); transition:background 500ms; }
-  .feature h3 { margin:0 0 8px; font:700 21px/1.15 var(--display); letter-spacing:-.03em; }
-  .feature p { margin:0; font-size:16px; color:var(--soft); }
-  .feature small { display:inline-block; margin-top:12px; padding:4px 10px; border-radius:99px; font:700 11.5px/1.2 var(--display); background:rgba(37,224,138,.16); color:#7df0b8; }
+  /* ---- one feature per screen: words on one side, two phones on the other ---- */
+  .bar { position:sticky; top:0; z-index:30; background:color-mix(in srgb, var(--night) 72%, transparent); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,.08); }
+  .bar nav { padding:14px 0; }
+  .lead { max-width:62ch; margin:0 0 6px; color:var(--soft); font-size:19px; }
+  .beat { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:56px; align-items:center; min-height:min(860px, 96vh); padding:56px 0; }
+  .beat.flip .words { order:2; }
+  .no { display:flex; align-items:center; gap:12px; margin:0 0 16px; font:700 14px/1 var(--display); color:var(--c); transition:color 500ms; }
+  .no span { opacity:.6; color:var(--ink); } .no::before { content:""; order:1; width:34px; height:1px; background:currentColor; opacity:.55; } .no b { order:2; font-weight:700; }
+  .beat h2, .problem h2 { margin:0 0 20px; max-width:15ch; font:800 clamp(34px, 4.5vw, 62px)/1.02 var(--display); letter-spacing:-.05em; text-wrap:balance; }
+  .beat .words p { margin:0 0 18px; max-width:46ch; font-size:19.5px; line-height:1.58; color:rgba(243,246,255,.86); }
+  .beat .words p.dim { padding-top:18px; border-top:1px solid var(--line); font-size:15.5px; color:rgba(243,246,255,.6); }
+  .ran { display:inline-block; padding:5px 12px; border-radius:99px; font:700 12.5px/1.2 var(--display); background:rgba(37,224,138,.16); color:#7df0b8; }
+  .ran.not { background:rgba(255,255,255,.1); color:rgba(243,246,255,.75); }
+  .duo { display:flex; justify-content:center; align-items:flex-start; padding:6px 0 70px; }
+  .phone { container-type:inline-size; flex:none; width:min(264px, 46%); aspect-ratio:9/19; padding:9px; border-radius:40px; background:#05070f; border:2px solid rgba(255,255,255,.22); box-shadow:0 50px 80px -36px #000, inset 0 0 0 2px #1a2038;
+           transition:transform 900ms cubic-bezier(.2,.8,.2,1), opacity 700ms; }
+  .phone.back { margin-right:-34px; transform:translateX(-46px) rotate(-7deg); opacity:0; }
+  .phone.front { z-index:2; transform:translateY(150px) rotate(5deg); opacity:0; }
+  .in .phone.back { transform:rotate(-4deg); opacity:.94; }
+  .in .phone.front { transform:translateY(54px) rotate(2.5deg); opacity:1; }
+  .beat p.cap { margin:0; max-width:none; font-size:12.5px; }
+  .cap { margin:0; text-align:center; font:600 12.5px/1 var(--display); color:rgba(243,246,255,.5); }
+  .screen { position:relative; height:100%; border-radius:31px; overflow:hidden; padding:15cqw 6.4cqw 6.4cqw; font-size:4.7cqw; display:flex; flex-direction:column; gap:3.3cqw;
+            background:radial-gradient(90cqw 80cqw at 18% 0, color-mix(in srgb, var(--c) 50%, transparent), transparent 70%), #0a0e1f; }
+  .screen::before { content:""; position:absolute; top:3.6cqw; left:50%; width:28cqw; height:7cqw; margin-left:-14cqw; border-radius:99px; background:#05070f; }
+  .screen::after { content:"9:41"; position:absolute; top:5cqw; left:8.4cqw; font:700 .86em/1 var(--display); }
+  .s-bar { display:flex; justify-content:space-between; gap:8px; font:700 .9em/1.2 var(--display); } .s-bar span + span { opacity:.72; font-weight:600; white-space:nowrap; }
+  .s-phase { display:flex; align-items:center; gap:.5em; font:800 1.95em/1 var(--display); letter-spacing:-.045em; }
+  .s-phase i { width:.4em; height:.4em; border-radius:50%; background:var(--tone, #fff); box-shadow:0 0 0 .2em color-mix(in srgb, var(--tone, #fff) 30%, transparent); }
+  .s-name { margin:0; font:800 1.7em/1.05 var(--display); letter-spacing:-.04em; }
+  .s-p { margin:0; font-size:.98em; line-height:1.42; color:var(--soft); }
+  .s-heard { margin:0; font:600 1.16em/1.38 var(--text); }
+  .screen .poster { flex:none; aspect-ratio:1/1.02; border-radius:1.4em; }
+  .screen .poster b { font-size:1.02em; padding:.8em .9em 1.5em; }
+  .s-rows { padding:.75em .95em; border-radius:1.1em; background:#fff; color:#0b1020; font:600 .93em/1.3 var(--text); }
+  .s-rows div { display:flex; justify-content:space-between; align-items:baseline; gap:.6em; padding:.36em 0; border-bottom:1px solid #e1e6f3; }
+  .s-rows em { font:700 .7em/1 var(--display); font-style:normal; padding:.2em .5em; margin-left:.4em; border-radius:99px; background:#dff7ea; color:#12804a; white-space:nowrap; }
+  .s-rows em.grey { background:#eef1f8; color:#56618a; }
+  .s-rows div.sum { border:0; padding-bottom:0; font:800 1.5em/1.3 var(--display); letter-spacing:-.03em; }
+  .s-pill { margin-top:auto; padding:.95em; border-radius:99px; text-align:center; font:700 1em/1 var(--display); color:#0b1020; background:#fff; }
+  .s-pill.go { background:linear-gradient(135deg, #25e08a, #0f9d58); } .s-pill.line { background:transparent; color:var(--ink); border:1px solid rgba(255,255,255,.4); }
+  .s-code { flex:1; min-height:34cqw; border-radius:1.2em; background:#fff conic-gradient(#0b1020 25%, #fff 0 50%, #0b1020 0 75%, #fff 0) 0 0/8.4cqw 8.4cqw; border:3.4cqw solid #fff; }
+  .s-big { flex:1; display:grid; place-items:center; font:normal 6.4em/1 system-ui; }
+  .s-big span { display:grid; place-items:center; width:1.9em; height:1.9em; border-radius:50%; background:color-mix(in srgb, var(--c) 30%, rgba(255,255,255,.06)); box-shadow:0 0 0 .22em color-mix(in srgb, var(--c) 16%, transparent), 0 0 0 .5em color-mix(in srgb, var(--c) 8%, transparent); }
+  .s-stamp { align-self:center; margin:auto 0; padding:.28em .6em .22em; border-radius:.42em; color:#fff; background:linear-gradient(135deg, #25e08a, #0f9d58); font:800 3.3em/1 var(--display); transform:rotate(-8deg); box-shadow:0 .4em .9em -.3em #12a85c; }
+  .s-list div { display:flex; justify-content:space-between; gap:.6em; padding:.56em 0; border-bottom:1px solid var(--line); font:600 1em/1.25 var(--text); } .s-list b { font:700 1em/1.25 var(--display); }
+  .s-grid { display:grid; grid-template-columns:1fr 1fr; gap:.6em; } .s-grid .poster { aspect-ratio:3/4; border-radius:1em; } .s-grid .poster b { font-size:.66em; padding:.7em .7em 1.4em; }
+  .s-input { padding:.85em 1em; border-radius:1em; background:rgba(0,0,0,.42); border:1px solid rgba(255,255,255,.3); font:600 1.08em/1.3 ui-monospace, Menlo, monospace; }
+  .s-chips { display:flex; flex-wrap:wrap; gap:.4em; } .s-chips span { padding:.42em .75em; border:1px solid rgba(255,255,255,.3); border-radius:99px; font:700 .8em/1 var(--display); }
+  .s-clock { font:800 3.5em/1 var(--display); letter-spacing:-.05em; font-variant-numeric:tabular-nums; } .s-clock small { display:block; margin-top:.5em; font:600 .28em/1 var(--display); letter-spacing:0; opacity:.7; }
 
-  /* ---- the phone app, as a design preview ---- */
-  .phones { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:26px; justify-items:center; }
-  .phone { width:min(100%, 270px); aspect-ratio:9/19; padding:12px; border-radius:42px; background:#05070f; border:2px solid rgba(255,255,255,.22); box-shadow:0 50px 80px -36px #000, inset 0 0 0 2px #1a2038; transition:transform 300ms; }
-  .phone:hover { transform:translateY(-8px); }
-  .screen { position:relative; height:100%; border-radius:32px; overflow:hidden; padding:34px 16px 16px; background:radial-gradient(260px 240px at 20% 0, color-mix(in srgb, var(--c) 46%, transparent), transparent 70%), #0a0e1f; display:flex; flex-direction:column; gap:10px; transition:background 500ms; }
-  .screen::before { content:""; position:absolute; top:10px; left:50%; width:74px; height:18px; margin-left:-37px; border-radius:99px; background:#05070f; }
-  .screen h4 { margin:0; font:800 21px/1.05 var(--display); letter-spacing:-.04em; }
-  .screen p { margin:0; font-size:12.5px; line-height:1.4; color:var(--soft); }
-  .screen .poster { aspect-ratio:1/1.05; flex:none; }
-  .screen .poster b { font-size:13px; padding:10px 12px 18px; }
-  .pill { margin-top:auto; padding:11px; border-radius:99px; text-align:center; font:700 13px/1 var(--display); color:#0b1020; background:#fff; }
-  .pill.go { background:linear-gradient(135deg, #25e08a, #0f9d58); }
-  .mini { padding:10px 12px; border-radius:14px; background:#fff; color:#0b1020; font:600 11.5px/1.5 var(--text); }
-  .mini div { display:flex; justify-content:space-between; border-bottom:1px solid #e1e6f3; padding:3px 0; }
-  .mini div:last-child { border:0; font:800 16px/1.4 var(--display); }
-  .heard { font:600 14px/1.4 var(--text); }
-  .code { flex:1; min-height:90px; border-radius:16px; background:#fff conic-gradient(#0b1020 25%, #fff 0 50%, #0b1020 0 75%, #fff 0) 0 0/22px 22px; border:10px solid #fff; }
-  .label { margin:22px auto 0; max-width:62ch; text-align:center; font-size:15px; color:var(--soft); }
+  /* ---- the top demo: the band, the words, the ticket ---- */
+  .demo { padding:22px; border:1px solid var(--line); border-radius:32px; background:linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.02)); box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 50px 90px -40px #000; }
+  .demohead { display:flex; align-items:center; gap:18px; margin-bottom:14px; }
+  .band { --led:#8b93b5; flex:none; display:flex; align-items:center; justify-content:center; gap:5px; width:84px; height:84px; border-radius:28px; background:#0b1020; border:2px solid rgba(255,255,255,.2);
+          box-shadow:0 0 0 7px color-mix(in srgb, var(--led) 20%, transparent), 0 0 46px color-mix(in srgb, var(--led) 60%, transparent); transition:box-shadow 400ms; }
+  .band i { width:5px; height:9px; border-radius:9px; background:var(--led); transition:background 400ms; }
+  .band.live i { animation:wave 620ms ease-in-out infinite alternate; }
+  .band.live i:nth-child(2) { animation-delay:-200ms; } .band.live i:nth-child(3) { animation-delay:-420ms; } .band.live i:nth-child(4) { animation-delay:-120ms; } .band.live i:nth-child(5) { animation-delay:-330ms; }
+  @keyframes wave { to { height:40px; } }
+  .demohead small { display:block; font:700 13px/1.4 var(--display); opacity:.7; }
+  .demohead strong { display:block; font:800 34px/1 var(--display); letter-spacing:-.045em; }
+  .spoken { min-height:3.1em; margin:0 0 14px; font:600 19px/1.45 var(--text); }
+  .demo .ticket { transform:none; min-height:232px; }
+  .track { display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; margin:16px 0 0; padding:0; list-style:none; }
+  .track li { padding-top:9px; border-top:3px solid rgba(255,255,255,.18); font:700 12.5px/1.2 var(--display); color:rgba(243,246,255,.5); transition:color 300ms, border-color 300ms; }
+  .track li.on { color:var(--ink); border-color:var(--c); }
+  .who { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr); gap:28px; align-items:stretch; }
+  .who .own { margin:0; grid-template-columns:1fr; align-content:center; }
+  .vision { padding:150px 0 50px; text-align:center; }
+  .vision h2 { margin:0 auto 24px; max-width:15ch; font:800 clamp(40px, 6.2vw, 88px)/.98 var(--display); letter-spacing:-.055em; text-wrap:balance; }
+  .vision p { max-width:50ch; margin:0 auto; font-size:21px; color:var(--soft); }
+
+  /* ---- the problem: three notes that never became bills ---- */
+  .problem { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:56px; align-items:center; min-height:min(760px, 90vh); padding:90px 0 40px; }
+  .problem p { margin:0 0 18px; max-width:46ch; font-size:19.5px; color:rgba(243,246,255,.86); }
+  .problem blockquote { margin:26px 0 0; padding:4px 0 4px 20px; border-left:3px solid var(--c); font:700 22px/1.3 var(--display); letter-spacing:-.025em; max-width:22ch; }
+  .notes { position:relative; height:440px; }
+  .notes div { position:absolute; width:250px; padding:20px 20px 26px; color:#1b1a12; font:600 19px/1.35 "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive; box-shadow:0 30px 40px -22px #000; }
+  .notes div:nth-of-type(1) { left:6%; top:20px; background:#ffe27a; transform:rotate(-5deg); }
+  .notes div:nth-of-type(2) { left:38%; top:120px; background:#ffb3a1; transform:rotate(4deg); }
+  .notes div:nth-of-type(3) { left:14%; top:250px; background:#a8e6cf; transform:rotate(-2deg); }
+  .notes b { position:absolute; left:52%; top:6px; z-index:3; padding:8px 16px; background:#fff; color:#0b1020; font:800 20px/1 var(--display); transform:rotate(8deg); box-shadow:0 14px 24px -12px #000; }
+
+  .label { font-size:15px; color:var(--soft); }
+  /* ---- hand it to your AI ---- */
+  .hand { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:center; margin:8px 0 14px; padding:20px 22px; border:1px solid var(--line); border-radius:20px; background:rgba(0,0,0,.4); }
+  .hand code { font:500 15.5px/1.6 ui-monospace, Menlo, monospace; color:var(--ink); }
+
+  /* ---- where you are on the page ---- */
+  .dots { position:fixed; right:22px; top:50%; z-index:20; display:flex; flex-direction:column; gap:12px; transform:translateY(-50%); }
+  .dots a { width:5px; height:5px; border-radius:99px; background:rgba(255,255,255,.4); transition:height 300ms, background 300ms; }
+  .dots a.on { height:16px; background:var(--c); }
+  .count { position:fixed; left:26px; bottom:22px; z-index:20; margin:0; font:700 13px/1 var(--display); color:rgba(243,246,255,.5); } .count b { color:var(--ink); }
 
   .rules { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:34px; }
   .rules h3 { margin:0 0 8px; font:700 22px/1.15 var(--display); letter-spacing:-.03em; }
@@ -126,31 +195,71 @@
 
   .rise { opacity:0; transform:translateY(22px); transition:opacity 600ms, transform 600ms; }
   .rise.in { opacity:1; transform:none; }
-  @media (max-width: 980px) { .top, .try { grid-template-columns:1fr; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .features, .rules, .phones, .next { grid-template-columns:1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
-  @media (prefers-reduced-motion: reduce) { .rise { opacity:1; transform:none; transition:none; } .row, .paid, .hero, .phone, body { transition:none; } html { scroll-behavior:auto; } }
+  @media (max-width: 980px) { .top, .try, .beat, .problem, .hand, .who { grid-template-columns:1fr; } .beat { gap:30px; min-height:0; padding:70px 0 20px; } .beat.flip .words { order:0; } .problem { min-height:0; } .notes { height:400px; } .notes div { width:210px; font-size:17px; } .dots, .count { display:none; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .rules, .next { grid-template-columns:1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
+  @media (prefers-reduced-motion: reduce) { .band.live i { animation:none; height:22px; } .rise { opacity:1; transform:none; transition:none; } .row, .paid, .hero, .phone, body, .dots a { transition:none; } .phone.back { transform:rotate(-4deg); opacity:.94; } .phone.front { transform:translateY(54px) rotate(2.5deg); opacity:1; } html { scroll-behavior:auto; } }
 </style>
 </head>
 <body>
-<div class="wrap">
+<header class="bar"><div class="wrap">
   <nav>
     <strong>TapJob</strong>
-    <a href="#how">How it works</a>
-    <a href="#heroes">Heroes</a>
-    <a href="#does">What it does</a>
-    <a href="#app">App</a>
+    <a href="#why">Why</a>
+    <a href="#does">What changes</a>
+    <a href="#heroes">Who it is for</a>
+    <a href="#ai">Hand it to your AI</a>
     <a class="button" href="https://github.com/HERO-1900/tapjob">Code on GitHub</a>
   </nav>
+</div></header>
+<div class="wrap">
 
-  <section class="top">
+  <section class="top" data-s="Start">
     <div>
-      <h1>Every job has a hero.</h1>
-      <p class="lede">TapJob is a wrist band that turns what you say at work into a paid bill. Double-tap, say what you did or what was ordered, raise your fist. The customer pays on their own phone and your band turns green.</p>
+      <h1>Say it.<br>Get paid.</h1>
+      <p class="lede">TapJob is a wrist band that listens while you work. Hands full, hands dirty, no phone in reach: say what you did, and the bill is ready before you leave.</p>
       <div class="calls">
-        <button class="button" id="replay">Play a job</button>
-        <a class="button line" href="#does">Everything it does</a>
+        <a class="button" href="#why">See why</a>
+        <a class="button line" href="#heroes">Find your job</a>
       </div>
     </div>
+    <div class="demo" aria-label="A replay of one job, from the first double-tap to paid">
+      <div class="demohead">
+        <div class="band" id="dband" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <div><small id="dkind"></small><strong id="dphase"></strong></div>
+      </div>
+      <p class="spoken" id="dsaid"></p>
+      <div class="ticket">
+        <header><span id="dbiz" style="font:800 17px/1.1 var(--display);color:#0b1020;letter-spacing:-.03em"></span><span>ticket</span></header>
+        <div id="drows"></div>
+        <div class="sum"><span>Total</span><output id="dtotal"></output></div>
+        <div class="paid" id="dpaid">PAID</div>
+      </div>
+      <ol class="track" id="dtrack"><li>Double-tap</li><li>Say it</li><li>Check it</li><li>Fist up</li><li>Paid</li></ol>
+      <p class="note">A replay of real tickets from today, not the live band.</p>
+    </div>
+  </section>
 
+  <section class="problem rise" id="why" data-s="The problem">
+    <div>
+      <p class="no"><span>01</span><b>The problem</b></p>
+      <h2>Your hands were full. So the bill is still a sticky note.</h2>
+      <p>Your hands are wet. The next car is at the window. The next client is already on the table. So the paperwork waits until tonight, and tonight you have forgotten half of it.</p>
+      <blockquote>Work you never billed is work you did for free.</blockquote>
+    </div>
+    <div class="notes" aria-hidden="true">
+      <b>how much??</b>
+      <div>Mrs. Chen, kitchen faucet. Cartridge + 2 lines. Bill her tonight</div>
+      <div>Car 3: two doubles, fries, shake&hellip; or was it three?</div>
+      <div>Mr. Diaz brakes. Send invoice this weekend!!</div>
+    </div>
+  </section>
+
+  <h2 id="does" class="rise">So we put the paperwork on your wrist</h2>
+  <p class="lead rise">Every step below ran today on the real band. The phone screens are a design preview of the app, which is not built yet.</p>
+  <div id="beats"></div>
+
+  <h2 id="heroes" class="rise" data-s="Who it is for">Every job has a hero</h2>
+  <p class="sub rise">Taking orders at a drive-through window. Waiting tables. Fixing a sink in someone’s kitchen. Part-time or full-time. If your hands are busy, it is for you. Pick a job to see its ticket.</p>
+  <div class="who rise">
     <div class="stage" aria-label="A replay of one job. Pick a hero to see theirs.">
       <figure class="poster" id="poster"><b id="ptitle"></b><img id="pimg" alt=""></figure>
       <div class="play">
@@ -165,71 +274,43 @@
       </div>
       <div class="chips" id="chips" role="group" aria-label="Pick a hero"></div>
     </div>
-  </section>
-
-  <h2 id="how" class="rise">Five steps, all from the wrist</h2>
-  <ol class="steps rise">
-    <li><strong>Double-tap the band</strong><span>It listens while you work. Its light turns blue, so people nearby can see the microphone is on.</span></li>
-    <li><strong>Say it</strong><span>"Two double cheeseburgers, one fries, a diet soda and a shake." No prices needed.</span></li>
-    <li><strong>Double-tap again</strong><span>The words become a ticket, priced from your own price list, and it is read back to you.</span></li>
-    <li><strong>Raise your fist</strong><span>Hold it up for a moment, or double-tap. A Stripe invoice goes out with a payment page and a code to scan.</span></li>
-    <li><strong>Get paid</strong><span>The customer pays on their own phone. The band turns green and the ticket is stamped.</span></li>
-  </ol>
-
-  <h2 id="heroes" class="rise">Pick your hero, or make your own</h2>
-  <p class="sub rise">Each hero is a job with its own scene, its own way of billing and its own price list. Pick one and the whole page takes its colours. Not there? One sentence is enough.</p>
-  <div class="heroes rise">
-    <figure class="hero"><div class="poster" style="--c:rgb(212,107,90);--art:url(heroes/plumber.jpg)"><b>Plumber</b><img src="heroes/plumber.jpg" alt="A toy figure of a plumber with a big pipe wrench, one fist raised, a glowing band on the wrist"></div><figcaption><strong>Leakbreaker</strong><span>Parts and hours. Hours you did not say are timed by the band.</span></figcaption></figure>
-    <figure class="hero"><div class="poster" style="--c:rgb(245,218,137);--art:url(heroes/drive-through.jpg)"><b>Drive-through order taker</b><img src="heroes/drive-through.jpg" alt="A toy figure on roller skates carrying a tray with a burger, fries and a shake"></div><figcaption><strong>Lane Captain</strong><span>Hears the whole car and rings it up from the menu.</span></figcaption></figure>
-    <figure class="hero"><div class="poster" style="--c:rgb(89,170,167);--art:url(heroes/massage.jpg)"><b>Massage therapist</b><img src="heroes/massage.jpg" alt="A toy figure in a wrap tunic with warm stones floating above one palm"></div><figcaption><strong>Knot Tamer</strong><span>Sessions and add-ons, settled hands-free.</span></figcaption></figure>
-    <figure class="hero"><div class="poster" style="--c:rgb(222,133,93);--art:url(heroes/mechanic.jpg)"><b>Auto mechanic</b><img src="heroes/mechanic.jpg" alt="A toy figure of a mechanic holding an impact wrench, one foot on a stack of tyres"></div><figcaption><strong>Torque Titan</strong><span>Parts from the price list, labor by the bay clock.</span></figcaption></figure>
-    <figure class="hero"><div class="poster" style="--c:rgb(196,99,92);--art:url(heroes/rocket.jpg)"><b>Rocket repair technician</b><img src="heroes/rocket.jpg" alt="A toy figure of a rocket technician with goggles and a wrench"></div><figcaption><strong>Orbital Wrench</strong><span>Made today from one sentence, with its own price list.</span></figcaption></figure>
-  </div>
-  <div class="own rise">
-    <p><b>Make your own hero.</b> Type one sentence about your job. Gemini writes the card, the hero's name and a starter price list, then paints the figure with your tools, your scene and the band on a raised fist. Choose whether heroes are painted as women, men or either.</p>
-    <kbd>i fix the rocket</kbd>
+    <div class="own">
+      <p><b>Your job is not here? One sentence.</b> Type what you do. Gemini writes your card and a starter price list, and paints your hero with your tools and your scene.</p>
+      <kbd>i fix the rocket</kbd>
+    </div>
   </div>
 
-  <h2 id="does" class="rise">Everything it does, one by one</h2>
-  <div class="features">
-    <article class="feature rise"><i>🎙️</i><h3>Talk, don't type</h3><p>The band's microphone streams to Deepgram while you work. The words appear live on the page, and the microphone is on only between two double-taps.</p><small>Runs on the real band</small></article>
-    <article class="feature rise"><i>🧾</i><h3>Your price list prices the ticket</h3><p>Paste your menu, pick a text file or try a sample (burger stand, boba shop, sushi bar). Say an item, never a price: the price is looked up in plain code and the line is marked "price list".</p><small>Runs on the real band</small></article>
-    <article class="feature rise"><i>🦸</i><h3>A hero for every job</h3><p>Four jobs come ready: plumber, drive-through, massage, mechanic. Each knows whether it bills by the hour or by the item, and brings its own price list.</p><small>Runs on the real band</small></article>
-    <article class="feature rise"><i>✍️</i><h3>Any job from one sentence</h3><p>"I fix rockets on the launch pad." Gemini writes the card and the starter prices, every field is checked in code, and the image model paints the figure.</p><small>Runs on the real band</small></article>
-    <article class="feature rise"><i>✊</i><h3>Raise your fist to send</h3><p>The band knows which way it points. Teach the raised fist once; after that, holding it up while a ticket is waiting sends the bill. A double-tap still works.</p><small>Sent two bills today</small></article>
-    <article class="feature rise"><i>💚</i><h3>Paid means green</h3><p>The bill is a Stripe invoice with a payment page and a code to scan. When the customer pays, the band turns green and the ticket gets its stamp.</p><small>Paid with Stripe's test card</small></article>
-    <article class="feature rise"><i>↩️</i><h3>Take it back</h3><p>Nothing is sent until you confirm. If a bill went out by mistake, Discard voids the invoice at Stripe, so its payment page stops taking money.</p></article>
-    <article class="feature rise"><i>⏱️</i><h3>The band keeps time</h3><p>For jobs that bill by the hour, start and stop are measured by the taps. Say the hours and they are used; say nothing and the band's clock bills them in quarter hours.</p><small>Runs on the real band</small></article>
-    <article class="feature rise"><i>📡</i><h3>Bluetooth or a cable</h3><p>The band talks to a small program on a laptop, over Bluetooth with no wire or over USB. No account, nothing to install on the band.</p><small>Both ran today</small></article>
-  </div>
-
-  <h2 id="app" class="rise">The app, next</h2>
-  <p class="sub rise">Today TapJob runs on a laptop next to the band. On a phone it looks like this. These three screens are a design preview, built from the same page and the same heroes.</p>
-  <div class="phones rise">
-    <div class="phone"><div class="screen"><div class="poster"><b class="mtitle"></b><img class="mimg" alt=""></div><h4 class="mname"></h4><p>Ready. Double-tap the band to start.</p><div class="pill">Change or create job</div></div></div>
-    <div class="phone"><div class="screen"><p>Listening</p><p class="heard msaid"></p><div class="mini mrows"></div><div class="pill go">Fist up to send</div></div></div>
-    <div class="phone"><div class="screen"><h4>Customer pays here</h4><p>They scan it with their own phone. You keep working.</p><div class="code" role="img" aria-label="A stand-in for the payment code"></div><div class="pill go mtotal"></div></div></div>
-  </div>
-  <p class="label rise">The phone app is not built yet. An iPhone cannot reach a Bluetooth band from a web page, so the phone needs a real app.</p>
-
-  <h2 class="rise">The model never touches the money</h2>
+  <h2 class="rise" data-s="The rules">The model never touches the money</h2>
   <div class="rules rise">
     <div><h3>Prices are looked up, not guessed</h3><p>Gemini only matches what you said to names on your price list. The price, the quantities and the total are computed in plain code.</p></div>
     <div><h3>A person confirms every bill</h3><p>The ticket is shown and read back first. Only the raised fist, a double-tap or the Send button creates the invoice.</p></div>
     <div><h3>You can see where the money goes</h3><p>The page names the Stripe account the bills are paid into. This build runs in Stripe's test mode only and refuses live keys.</p></div>
   </div>
 
-  <h2 class="rise">What comes next</h2>
+  <section class="vision rise" data-s="Why it matters">
+    <h2>Hard work should be paid the moment it is done.</h2>
+    <p>So much work is done by hand, and its paperwork waits until night. Whoever you are and whatever you do, TapJob listens, writes it down and gets you paid. The evening is yours again.</p>
+  </section>
+
+  <h2 id="ai" class="rise" data-s="Hand it to your AI">Let your AI set it up</h2>
+  <p class="sub rise">TapJob ships with notes written for AI coding agents. Hand yours this line: it can clone the code, run the tests and play a whole job on the pretend band. No band and no keys needed.</p>
+  <div class="hand rise">
+    <code id="line">Clone https://github.com/HERO-1900/tapjob, read README.md and AGENTS.md, then run the demo with the pretend band and show me the paid ticket.</code>
+    <button class="button" id="copy" type="button">Copy the line</button>
+  </div>
+  <p class="label rise" style="margin:0;text-align:left">Signing you up to a hosted TapJob, with your own account and payouts, is the next step and is not built yet.</p>
+
+  <h2 class="rise" data-s="What comes next">What comes next</h2>
   <ul class="next rise">
     <li><b>Sign in and connect your own Stripe</b>Today you paste your own Stripe key. Next: one sign-in, and the money goes straight to your account.</li>
-    <li><b>Let your AI sign you up</b>Tell your assistant what you do; it creates your hero, your price list and your account for you.</li>
-    <li><b>The phone app</b>The three screens above, on iPhone and Android, talking to the band directly.</li>
+    <li><b>Let your AI sign you up</b>Today your AI can set TapJob up from the code. Next: tell it what you do, and it creates your hero, your price list and your account.</li>
+    <li><b>The phone app</b>The screens above, on iPhone and Android, talking to the band directly. A web page cannot reach a Bluetooth band on an iPhone.</li>
     <li><b>The bill on the customer's phone</b>By text message to a number you say out loud, or a pairing code the customer types.</li>
     <li><b>Shake to undo</b>A quick shake of the wrist takes the last ticket back, without touching a screen.</li>
     <li><b>A shell for every brand</b>The band in your shop's colours, the hero in your uniform.</li>
   </ul>
 
-  <h2 id="try" class="rise">Try it</h2>
+  <h2 id="try" class="rise" data-s="Try it">Try it</h2>
   <div class="try rise">
     <div>
       <p class="sub" style="margin-bottom:22px">The band talks to a small program on your own laptop, so the live version runs there, not on this site. Without a band, the pretend one runs the whole loop in half a minute.</p>
@@ -246,6 +327,8 @@ python3 app.py 42             # with your band (42 = its number)</pre>
 
   <footer>Built at VexoHacks, Y Combinator, San Francisco, 14 November 2026. The figures are original characters painted by Gemini's image model from each job's own description.</footer>
 </div>
+<nav class="dots" id="dots" aria-label="Sections"></nav>
+<p class="count" id="count" aria-hidden="true"></p>
 
 <script>
 const HEROES = [
@@ -289,23 +372,144 @@ function show(hero, animate) {
   const stamp = () => $('ppaid').classList.add('on');
   if (animate && !calm) { timers.push(setTimeout(end, after), setTimeout(stamp, after + 900)); } else { end(); stamp(); }
   all('#chips button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.key === hero.key)));
-  all('.screen .poster').forEach((e) => e.style.setProperty('--art', 'url(heroes/' + hero.key + '.jpg)'));
-  all('.mtitle').forEach((e) => e.textContent = hero.title); all('.mimg').forEach((e) => { e.src = 'heroes/' + hero.key + '.jpg'; e.alt = hero.title; });
-  all('.mname').forEach((e) => e.textContent = hero.name); all('.msaid').forEach((e) => e.textContent = hero.said);
-  all('.mtotal').forEach((e) => e.textContent = 'Waiting for ' + hero.total);
-  all('.mrows').forEach((box) => { box.replaceChildren(); for (const [what, amount] of hero.rows.concat([['Total', hero.total]])) { const d = document.createElement('div'); const a = document.createElement('span'); a.textContent = what; const b = document.createElement('span'); b.textContent = amount; d.append(a, b); box.append(d); } });
 }
 let current = HEROES[0];
 for (const hero of HEROES) {
   const pick = document.createElement('button'); pick.type = 'button'; pick.dataset.key = hero.key; pick.textContent = hero.name;
   pick.onclick = () => { current = hero; show(hero, true); }; $('chips').append(pick);
 }
-$('replay').onclick = () => show(current, true);
-show(current, true);
+show(current, false);
+
+/* ---- the top demo: one job after another, from the first double-tap to paid ---- */
+const KIND = { 'drive-through': 'A drive-through order', plumber: 'A plumbing job', massage: 'A massage session', mechanic: 'A brake job', rocket: 'A rocket repair' };
+const LED = { idle: '#8b93b5', blue: '#4d8dff', amber: '#ffc043', green: '#25e08a' };
+let turn = 0, waits = [];
+const later = (ms, fn) => waits.push(setTimeout(fn, ms));
+function at(n, phase, led, live) {
+  all('#dtrack li').forEach((li, i) => li.classList.toggle('on', i <= n));
+  $('dphase').textContent = phase; $('dband').style.setProperty('--led', LED[led]); $('dband').classList.toggle('live', !!live);
+}
+function line(what, amount, listed) {
+  const row = document.createElement('div'); row.className = 'row on';
+  const name = document.createElement('span'); name.textContent = what;
+  const tag = document.createElement('em'); tag.textContent = listed ? 'price list' : 'said'; if (!listed) tag.className = 'said-it'; name.append(tag);
+  const sum = document.createElement('b'); sum.textContent = amount; row.append(name, sum); return row;
+}
+function demo() {
+  waits.forEach(clearTimeout); waits = [];
+  const job = HEROES[turn % HEROES.length]; turn += 1;
+  $('dkind').textContent = KIND[job.key]; $('dbiz').textContent = job.biz;
+  $('dsaid').textContent = ''; $('drows').replaceChildren(); $('dtotal').textContent = ''; $('dpaid').className = 'paid';
+  if (calm) {                                           // no motion wanted: show the finished job and stay there
+    $('dsaid').textContent = job.said; job.rows.forEach((r) => $('drows').append(line(...r))); $('dtotal').textContent = job.total;
+    $('dpaid').classList.add('on'); at(4, 'Paid', 'green'); return;
+  }
+  at(0, 'Double-tap', 'idle');
+  later(800, () => at(1, 'Listening', 'blue', true));
+  let t = 1000;
+  for (let i = 1; i <= job.said.length; i++) later(t + i * 26, () => { $('dsaid').textContent = job.said.slice(0, i); });
+  t += job.said.length * 26 + 450;
+  later(t, () => at(2, 'Check it', 'amber'));
+  job.rows.forEach((r, i) => later(t + 250 + i * 360, () => $('drows').append(line(...r))));
+  t += 250 + job.rows.length * 360;
+  later(t, () => { $('dtotal').textContent = job.total; });
+  later(t + 1000, () => at(3, 'Fist up', 'amber'));
+  later(t + 2000, () => { at(4, 'Paid', 'green'); $('dpaid').classList.add('on'); });
+  later(t + 5600, demo);
+}
+demo();
+/* ---- one feature per screen. Each has two phone screens, described as lists of blocks. ---- */
+const TONE = { blue: '#4d8dff', amber: '#ffc043', green: '#25e08a' };
+const DRIVE = [['Double cheeseburger × 2', '$13.80', 'price list'], ['Fries', '$2.80', 'price list'], ['Diet soda', '$2.40', 'price list'], ['Shake', '$3.60', 'price list']];
+const PLUMB = [['Faucet cartridge', '$45.00', 'price list'], ['Supply line × 2', '$24.00', 'price list'], ['Labor 1 h at $95/h', '$95.00', 'said']];
+const BEATS = [
+  { label: 'Say it', c: 'rgb(245,218,137)', h: 'Hands full? Just say it.', ran: 'Runs on the real band',
+    p: 'No phone, no screen, no typing. Double-tap the band and talk while you work.',
+    dim: 'It listens only between two double-taps, and its light turns blue so people nearby can see it.',
+    back: [['bar', 'Sunset Drive-In', 'Band 51'], ['poster', 'drive-through', 'Drive-through order taker'], ['name', 'Lane Captain'], ['p', 'Ready. Double-tap the band to start.'], ['pill', 'Change or create job', 'line']],
+    front: [['bar', 'Sunset Drive-In', 'Band 51'], ['phase', 'Listening', 'blue'], ['heard', '“Two double cheeseburgers, one fries, a diet soda and a shake.”'], ['p', 'Double-tap again when you are done.'], ['pill', 'Stop']] },
+  { label: 'It remembers', c: 'rgb(212,107,90)', h: 'Think out loud. Nothing gets forgotten.', ran: 'Runs on the real band',
+    p: 'Talk your way through the job: the parts you used, what was ordered, what you fixed. Your words are written down as you say them, and the band times the job.',
+    dim: 'Say the hours and they are used. Say nothing and the band’s clock bills them, rounded up to the quarter hour.',
+    back: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['phase', 'Listening', 'blue'], ['clock', '0:40:12', 'on site since the first double-tap'], ['heard', '“Replaced the faucet cartridge and two supply lines.”']],
+    front: [['phase', 'Check it', 'amber'], ['rows', [['Faucet cartridge', '$45.00', 'price list'], ['Supply line × 2', '$24.00', 'price list'], ['Labor 0.75 h at $95/h', '$71.25', 'band clock']], '$140.25'], ['p', 'No hours were said. The band timed 40 minutes on site.'], ['pill', 'Fist up to send', 'go']] },
+  { label: 'Done means paid', c: 'rgb(89,170,167)', h: 'Job done. Bill done.', ran: 'Paid today with Stripe’s test card',
+    p: 'No tickets to write up tonight, no forms, no quotes to chase. The bill is ready when you stop talking, and the customer pays on their own phone before you leave.',
+    dim: 'It is a Stripe invoice with a payment page and a code to scan. When it is paid, the band turns green.',
+    back: [['name', 'Customer pays here'], ['p', 'They scan it with their own phone. You keep working.'], ['code'], ['pill', 'Waiting for $175.00']],
+    front: [['bar', 'Calm Hands Studio', 'Band 51'], ['stamp', 'PAID'], ['rows', [['90-minute massage', '$150.00', 'price list'], ['Hot stones', '$25.00', 'price list']], '$175.00'], ['p', 'Paid into ipo Lab, Stripe test mode.']] },
+  { label: 'Your prices', c: 'rgb(245,218,137)', h: 'You name the item. Your price list names the price.', ran: 'Runs on the real band',
+    p: 'Paste your menu or pick a sample. Say an item, never a price: it is looked up in plain code, not guessed by the model.',
+    dim: 'An item that is not on your list goes on the ticket at $0 with a warning.',
+    back: [['name', 'Price list'], ['list', [['Hamburger', '$4.50'], ['Cheeseburger', '$5.00'], ['Double cheeseburger', '$6.90'], ['Fries', '$2.80'], ['Shake', '$3.60'], ['Diet soda', '$2.40']]], ['chips', ['Burger stand', 'Boba tea shop', 'Sushi bar']], ['pill', 'Edit or upload yours', 'line']],
+    front: [['bar', 'Sunset Drive-In', 'Band 51'], ['phase', 'Check it', 'amber'], ['rows', DRIVE, '$22.60'], ['pill', 'Fist up to send', 'go']] },
+  { label: 'No screen to touch', c: 'rgb(222,133,93)', h: 'Ticket looks right? Fist up.', ran: 'Sent bills on the real band today, one over Bluetooth',
+    p: 'The ticket is read back to you. Hold your fist up for a moment and the bill goes out. Your hands never touch a screen.',
+    dim: 'Teach the band your raised fist once. A double-tap or the Send button still works.',
+    back: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['phase', 'Check it', 'amber'], ['rows', PLUMB, '$164.00'], ['pill', 'Fist up to send', 'go']],
+    front: [['bar', 'Wang & Sons Plumbing', 'Band 51'], ['big', '✊'], ['phase', 'Sending', 'amber'], ['p', 'Fist held up. Creating the Stripe invoice for $164.00.']] },
+];
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function posterEl(key, title) {
+  const box = el('div', 'poster'); box.style.setProperty('--art', 'url(heroes/' + key + '.jpg)');
+  const img = el('img'); img.src = 'heroes/' + key + '.jpg'; img.alt = 'The hero for the job: ' + title; img.loading = 'lazy';
+  box.append(el('b', '', title), img); return box;
+}
+function block([kind, a, b]) {
+  if (kind === 'bar') { const e = el('div', 's-bar'); e.append(el('span', '', a), el('span', '', b)); return e; }
+  if (kind === 'phase') { const e = el('div', 's-phase'); e.style.setProperty('--tone', TONE[b]); e.append(el('i'), el('span', '', a)); return e; }
+  if (kind === 'poster') return posterEl(a, b);
+  if (kind === 'name') return el('h4', 's-name', a);
+  if (kind === 'p') return el('p', 's-p', a);
+  if (kind === 'heard') return el('p', 's-heard', a);
+  if (kind === 'pill') return el('div', 's-pill ' + (b || ''), a);
+  if (kind === 'code') { const e = el('div', 's-code'); e.setAttribute('role', 'img'); e.setAttribute('aria-label', 'A stand-in for the payment code'); return e; }
+  if (kind === 'big') { const e = el('div', 's-big'); e.append(el('span', '', a)); return e; }
+  if (kind === 'stamp') return el('div', 's-stamp', a);
+  if (kind === 'input') return el('div', 's-input', a);
+  if (kind === 'clock') { const e = el('div', 's-clock', a); e.append(el('small', '', b)); return e; }
+  if (kind === 'chips') { const e = el('div', 's-chips'); a.forEach((t) => e.append(el('span', '', t))); return e; }
+  if (kind === 'grid') { const e = el('div', 's-grid'); a.forEach(([key, title]) => e.append(posterEl(key, title))); return e; }
+  if (kind === 'list') { const e = el('div', 's-list'); a.forEach(([what, amount]) => { const d = el('div'); d.append(el('span', '', what), el('b', '', amount)); e.append(d); }); return e; }
+  if (kind === 'rows') { const e = el('div', 's-rows');
+    a.forEach(([what, amount, tag]) => { const d = el('div'); const name = el('span', '', what); const t = el('em', tag === 'price list' ? '' : 'grey', tag); name.append(t); d.append(name, el('b', '', amount)); e.append(d); });
+    const sum = el('div', 'sum'); sum.append(el('span', '', 'Total'), el('span', '', b)); e.append(sum); return e; }
+  return el('div');
+}
+function phone(blocks, cls) { const p = el('div', 'phone ' + cls); const s = el('div', 'screen'); blocks.forEach((b) => s.append(block(b))); p.append(s); return p; }
+BEATS.forEach((beat, i) => {
+  const sec = el('section', 'beat' + (i % 2 ? ' flip' : '')); sec.dataset.s = beat.label; sec.dataset.c = beat.c; sec.style.setProperty('--c', beat.c);
+  const words = el('div', 'words');
+  const no = el('p', 'no'); no.append(el('span', '', String(i + 2).padStart(2, '0')), el('b', '', beat.label));
+  words.append(no, el('h2', '', beat.h), el('p', '', beat.p), el('p', 'dim', beat.dim), el('span', 'ran' + (beat.not ? ' not' : ''), beat.ran));
+  const shots = el('div', 'shots'); const duo = el('div', 'duo'); duo.append(phone(beat.back, 'back'), phone(beat.front, 'front'));
+  shots.append(duo, el('p', 'cap', 'Phone app: design preview'));
+  sec.append(words, shots); $('beats').append(sec);
+});
+
+$('copy').onclick = async () => {
+  try { await navigator.clipboard.writeText($('line').textContent); $('copy').textContent = 'Copied'; }
+  catch (e) { const r = document.createRange(); r.selectNodeContents($('line')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); $('copy').textContent = 'Selected: press copy'; }
+  setTimeout(() => { $('copy').textContent = 'Copy the line'; }, 2400);
+};
+
+/* ---- where you are: the dots on the right, the count at the bottom, and the page takes each section's colour ---- */
+const stops = all('[data-s]');
+stops.forEach((stop, i) => { if (!stop.id) stop.id = 's' + i; const a = el('a'); a.href = '#' + stop.id; a.title = stop.dataset.s; a.setAttribute('aria-label', stop.dataset.s); $('dots').append(a); });
+function here(i) {
+  all('#dots a').forEach((a, n) => a.classList.toggle('on', n === i));
+  $('count').replaceChildren(el('b', '', String(i + 1).padStart(2, '0')), ' / ' + String(stops.length).padStart(2, '0'));
+  const c = stops[i].dataset.c; if (c) document.documentElement.style.setProperty('--c', c);
+}
+here(0);
+if ('IntersectionObserver' in window) {
+  const mid = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) here(stops.indexOf(e.target)); }), { rootMargin: '-45% 0px -45% 0px' });
+  stops.forEach((s) => mid.observe(s));
+}
 if ('IntersectionObserver' in window && !calm) {
-  const seen = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); seen.unobserve(e.target); } }), { threshold: .12 });
-  all('.rise').forEach((e) => seen.observe(e));
-} else all('.rise').forEach((e) => e.classList.add('in'));
+  const seen = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); seen.unobserve(e.target); } }), { threshold: .14 });
+  all('.rise, .beat').forEach((e) => seen.observe(e));
+} else all('.rise, .beat').forEach((e) => e.classList.add('in'));
 </script>
 </body>
 </html>
