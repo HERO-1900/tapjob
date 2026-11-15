@@ -1,5 +1,7 @@
 # TapJob
 
+**Demo video:** https://tapjob.ipolab.ai/demo.mp4 (recorded on the real band, 14 November 2026)
+
 **Every job has a hero. Say it, tap it, get paid.** A wrist band for people whose hands are
 busy: double-tap, say what you did or what was ordered, double-tap again, and the customer
 gets a payment link. The band turns green when they pay. No phone in your hand, no register,
