@@ -9,7 +9,7 @@ It started with a plumber's invoice. The same loop takes a drive-through order, 
 session or a brake job: pick the job's card (or make one from a single sentence) and the band
 brings that job's price list with it.
 
-Built at VexoHacks (Y Combinator, 14 Nov 2026) on the Vexo Open band.
+Built at VexoHacks (Y Combinator, 14 Nov 2026) on the Vexo Open band. Project page: http://tapjob.ipolab.ai
 
 ## The loop, all from the wrist
 
@@ -164,14 +164,13 @@ loop against the kit's pretend band.
 
 ## What is real and what is not
 
-- Run end to end on a real band (Vexo-HACK-51, over the USB cable, 14 Nov 2026): double-tap,
-  live speech-to-text, Gemini's draft, a price list order with every line priced in code, a
-  Stripe test invoice, payment with the test card, the PAID state. Also on the real services:
-  a job card from one sentence, and the hero pictures from Gemini's image model.
-- The raised fist was taught and used on the real band once (it learned "+x up" and sent a
-  $29.30 order). Once is not a test: expect it to need tuning on other wrists.
-- Written today and not yet proven on the wrist: finding the band over Bluetooth with retries
-  (`link.py`; the first Bluetooth try failed while the kit's dashboard held the band).
+- Run end to end on a real band (Vexo-HACK-51, 14 Nov 2026), first over the USB cable and then
+  over Bluetooth with no cable: double-tap, live speech-to-text, Gemini's draft, a price list
+  order with every line priced in code, a Stripe test invoice, payment with the test card, the
+  PAID state. Also on the real services: a job card from one sentence, and the hero pictures
+  from Gemini's image model.
+- The raised fist was taught once and has sent two drafts on the real band (one of them over
+  Bluetooth). Two is not a test: expect it to need tuning on other wrists.
 - Found the hard way: a loudspeaker next to the band can shake it into a double-tap. Taps are
   ignored while the computer is speaking.
 - Tuned by guess, not measured: the tap sensitivity and the "hands working" motion threshold

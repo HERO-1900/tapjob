@@ -53,8 +53,8 @@ ticket can be traced to the price list or to something that was said out loud.
 
 ## Accomplishments that we're proud of
 
-The whole loop ran on a real band the same afternoon: spoken order, priced ticket, Stripe
-invoice, payment, PAID. Then a second job, a third, and one made from a sentence.
+The whole loop ran on a real band the same afternoon, over the cable and then over Bluetooth:
+spoken order, priced ticket, raised fist, Stripe invoice, payment, PAID. Then a second job, a third, and one made from a sentence.
 
 ## What we learned
 
@@ -78,3 +78,4 @@ Stripe: Best Economic Agent. Google DeepMind: Best Use of Gemini 4.
 ## Links
 
 Code: https://github.com/HERO-1900/tapjob
+Project page: http://tapjob.ipolab.ai
