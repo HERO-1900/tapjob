@@ -109,6 +109,10 @@ class StripeBilling:
     def is_paid(self, number):
         return self._call("GET", "invoices/%s" % number).get("status") == "paid"
 
+    def void(self, number):
+        """Take a sent invoice back: Stripe marks it void and its payment page stops taking money."""
+        self._call("POST", "invoices/%s/void" % number)
+
     def payee(self):
         """The name of the Stripe account these invoices are paid into (asked once, shown on the page)."""
         try:

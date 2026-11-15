@@ -56,7 +56,7 @@ DEFAULTS = {
     "ignore_taps_after_draft_s": 4.0,   # a second tap right after "stop" must not send the invoice
     "raise_face": "",              # which side of the band points up when the fist is raised ("+x" .. "-z");
                                    # taught from the page ("Teach the raised fist"), kept in config.json
-    "raise_hold_s": 1.0,           # hold the fist up this long to send the draft
+    "raise_hold_s": 0.7,           # hold the fist up this long (after the draft shows) to send it
 }
 
 SAMPLE_SAY = ("Job for Mr. Wang, kitchen sink is leaking under the cabinet. "
@@ -338,6 +338,13 @@ class Hub:
 
     def discard(self):
         if self.state["phase"] in ("draft", "sent"):
+            invoice = self.state.get("invoice")
+            if self.state["phase"] == "sent" and invoice and hasattr(self.biller, "void"):
+                try:                                         # taking a sent bill back, for real
+                    self.biller.void(invoice["id"])
+                    self.note("The invoice was taken back: Stripe has voided it.")
+                except billing.BillingError as problem:
+                    self.note("Could not void the invoice at Stripe: %s" % problem)
             self.note("Discarded.")
             self.reset()
 
@@ -459,8 +466,7 @@ class Hub:
             return
         raised = self.config.get("raise_face")
         if (raised and self.state["phase"] == "draft" and self.face == raised
-                and self.face_at >= self.draft_at            # raised after the draft was read out, not before
-                and now - self.face_at >= float(self.config["raise_hold_s"])):
+                and now - max(self.face_at, self.draft_at) >= float(self.config["raise_hold_s"])):
             self.note("Fist raised: sending.")
             self.send_invoice()
 
