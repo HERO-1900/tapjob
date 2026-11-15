@@ -39,7 +39,7 @@ Taken back, with the totals, and an earlier bill turns to Paid by itself when th
 pays. Discard after sending voids the invoice at Stripe.
 
 **Try it without a band.** The project page runs the same loop on a pretend band in your
-browser, from the words to PAID: http://tapjob.ipolab.ai/#live
+browser, from the words to PAID: https://tapjob.ipolab.ai/#live
 
 ## How we built it
 
@@ -93,4 +93,4 @@ Stripe: Best Economic Agent. Google DeepMind: Best Use of Gemini 4.
 ## Links
 
 Code: https://github.com/HERO-1900/tapjob
-Project page: http://tapjob.ipolab.ai
+Project page: https://tapjob.ipolab.ai

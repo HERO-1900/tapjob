@@ -9,7 +9,7 @@ It started with a plumber's invoice. The same loop takes a drive-through order, 
 session or a brake job: pick the job's card (or make one from a single sentence) and the band
 brings that job's price list with it.
 
-Built at VexoHacks (Y Combinator, 14 Nov 2026) on the Vexo Open band. Project page: http://tapjob.ipolab.ai
+Built at VexoHacks (Y Combinator, 14 Nov 2026) on the Vexo Open band. Project page: https://tapjob.ipolab.ai
 
 ## The loop, all from the wrist
 
@@ -66,7 +66,7 @@ The list is kept in `jobs/history.json` (not committed).
 ## Try it without a band
 
 The project page runs the same loop on a pretend band in the browser, with a pretend payment:
-http://tapjob.ipolab.ai/#live
+https://tapjob.ipolab.ai/#live
 
 ## Why a band and not a phone app
 
