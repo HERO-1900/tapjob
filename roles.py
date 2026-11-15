@@ -20,7 +20,8 @@ GEARS = ("cap", "hardhat", "headset", "headband", "goggles", "none")
 
 PRESETS = [
     {
-        "id": "plumber", "title": "Plumber", "hero": "Leakbreaker", "business": "Wang & Sons Plumbing",
+        "id": "plumber",
+        "look": "stocky and cheerful, a backwards cap and rosy cheeks, rolled-up sleeves, a tool belt heavy with fittings, knee pads, a short red hero cape", "tool": "a huge red pipe wrench resting on one shoulder", "scene": "a round base of shiny copper pipes with a brass valve, a small puddle and flying water drops", "pose": "one boot planted on a pipe, chest out, the free fist punched high in the air", "title": "Plumber", "hero": "Leakbreaker", "business": "Wang & Sons Plumbing",
         "power": "Stops the leak and writes the bill before the van door shuts.",
         "emoji": "🔧", "suit": "#1f4fd8", "cape": "#e23b2e", "gear": "cap",
         "bills_labor": True, "labor_rate": 95.0,
@@ -30,7 +31,8 @@ PRESETS = [
                   "and two supply lines. One hour of labor.",
     },
     {
-        "id": "drive-through", "title": "Drive-through order taker", "hero": "Lane Captain",
+        "id": "drive-through",
+        "look": "quick and bright, a striped paper hat and a headset with a microphone, an apron with a pocket full of straws, roller skates, a yellow hero scarf flying sideways", "tool": "a tray held high on one hand with a towering burger, fries and a shake", "scene": "a round base with a tiny drive-through window, a striped awning and the bumper of a toy car", "pose": "gliding forward on the skates, leaning into the turn, the free arm stretched out with the fist raised", "title": "Drive-through order taker", "hero": "Lane Captain",
         "business": "Sunset Drive-In",
         "power": "Hears the whole car and rings it up without a register.",
         "emoji": "🍔", "suit": "#e23b2e", "cape": "#ffc61a", "gear": "headset",
@@ -40,7 +42,8 @@ PRESETS = [
         "sample": "Two double cheeseburgers, one fries, one diet soda and a shake.",
     },
     {
-        "id": "massage", "title": "Massage therapist", "hero": "Knot Tamer", "business": "Calm Hands Studio",
+        "id": "massage",
+        "look": "calm and strong, hair in a high bun with a jade pin, a wrap tunic with wide sleeves, bare feet in wooden sandals, a long teal sash floating like a cape", "tool": "three warm smooth stones floating in a curve above one open palm", "scene": "a round base with a folded massage table corner, rolled towels, a candle and curling steam", "pose": "a balanced martial-arts stance, one knee bent, the free fist raised by the ear", "title": "Massage therapist", "hero": "Knot Tamer", "business": "Calm Hands Studio",
         "power": "Unties the knots and settles the bill hands-free.",
         "emoji": "💆", "suit": "#7a4fd6", "cape": "#19b5a5", "gear": "headband",
         "bills_labor": False, "labor_rate": 0.0,
@@ -49,7 +52,8 @@ PRESETS = [
         "sample": "Session for Ms. Rivera. Ninety-minute massage with hot stones.",
     },
     {
-        "id": "mechanic", "title": "Auto mechanic", "hero": "Torque Titan", "business": "Northside Auto Repair",
+        "id": "mechanic",
+        "look": "tall and wiry, a grease smudge on one cheek, a bandana, welding goggles on the forehead, coveralls tied at the waist, heavy gloves, a torn orange hero cape", "tool": "a roaring impact wrench held like a trophy, sparks flying from it", "scene": "a round base with a stack of tyres, a floor jack, an oil can and a chrome wheel", "pose": "one foot up on the tyres, leaning back with a grin, the free fist raised", "title": "Auto mechanic", "hero": "Torque Titan", "business": "Northside Auto Repair",
         "power": "Finds the rattle and bills by the bay clock.",
         "emoji": "🚗", "suit": "#2b3350", "cape": "#ff7a1a", "gear": "goggles",
         "bills_labor": True, "labor_rate": 140.0,
@@ -114,6 +118,8 @@ def clean(raw, fallback_title="My job"):
         "gear": gear if gear in GEARS else "none",
         "bills_labor": bool(raw.get("bills_labor")) and rate > 0, "labor_rate": rate,
         "price_list": prices[:80], "sample": text("sample", "", 220),
+        "look": text("look", "", 220), "tool": text("tool", "", 160), "scene": text("scene", "", 200),
+        "pose": text("pose", "", 180),
     }
 
 
@@ -168,7 +174,13 @@ INVENT = (
     "bills_labor: true only if this job normally charges by the hour; then labor_rate is a typical "
     "hourly rate in US dollars, else 0. price_list: five to eight things this job sells or charges for, "
     "with plausible US dollar prices. sample: one sentence this worker might say to the band while "
-    "working, naming two or three things from the price list, without prices."
+    "working, naming two or three things from the price list, without prices. "
+    "Then direct the picture of this hero as a collectible figure, so that nobody could mistake it for another "
+    "job: look: face, hair, build, clothes and three or four accessories that only this job has, plus one hero "
+    "touch (a cape, scarf or sash); tool: the one signature tool or product of the job, held in one hand, "
+    "oversized; scene: a small round base under the feet built from the job's own things; pose: a bold, "
+    "exaggerated action pose that leaves one fist free and raised. Each of these is one short phrase, with no "
+    "brand names and no existing characters."
 )
 INVENT_SCHEMA = {
     "type": "OBJECT",
@@ -182,9 +194,11 @@ INVENT_SCHEMA = {
             "type": "OBJECT", "properties": {"name": {"type": "STRING"}, "price": {"type": "NUMBER"}},
             "required": ["name", "price"]}},
         "sample": {"type": "STRING"},
+        "look": {"type": "STRING"}, "tool": {"type": "STRING"}, "scene": {"type": "STRING"},
+        "pose": {"type": "STRING"},
     },
     "required": ["title", "hero", "power", "business", "emoji", "suit", "cape", "gear", "bills_labor",
-                 "labor_rate", "price_list", "sample"],
+                 "labor_rate", "price_list", "sample", "look", "tool", "scene", "pose"],
 }
 
 

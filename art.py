@@ -18,7 +18,7 @@ GEAR = {"cap": "a work cap", "hardhat": "a yellow hard hat", "headset": "a heads
         "headband": "a headband", "goggles": "safety goggles pushed up on the forehead", "none": ""}
 
 
-STYLE = "toy3"                                  # part of the file name: a new style paints new pictures
+STYLE = "toy4"                                  # part of the file name: a new style paints new pictures
 FIGURES = {"woman": "a woman", "man": "a man", "person": "a person"}
 
 
@@ -42,19 +42,23 @@ def backdrop(role):
 
 def brief(role, figure="person"):
     gear = GEAR.get(role.get("gear"), "")
+    look = role.get("look") or ("a crisp work uniform for this job" + (", " + gear if gear else ""))
+    tool = role.get("tool") or "the one signature tool of this job, oversized"
+    scene = role.get("scene") or "a small round base built from the things of this job"
+    pose = role.get("pose") or "a bold action pose with one fist raised"
     return (
-        "A designer art toy: ONE collectible vinyl figure of an original character, %s whose job is %s. "
-        "Chibi proportions: a very large round head, a small body, chunky shoes; the whole figure is "
-        "visible from the top of the head to the shoes and fills about 85 percent of the picture height, "
-        "centred. %sBig glossy eyes, a small confident smile. A refined miniature work uniform for this job "
-        "in the colour %s with %s details. One fist raised to the sky; on that wrist a slim smart wristband "
-        "with one small glowing light. Smooth matte vinyl with soft highlights, soft studio light, seen "
-        "slightly from below. Background: ONE flat solid colour, %s, no gradient, no props, only a soft "
-        "shadow under the shoes. Portrait picture. No text, no letters, no numbers, no logos, no brand "
-        "names, no watermark. An original design, not based on any existing character, mascot or toy line."
-        % (FIGURES.get(figure, "a person"), role["title"],
-           ("Oversized " + gear[2:] if gear.startswith("a ") else gear.capitalize()) + ". " if gear else "",
-           role["suit"], role["cape"], backdrop(role)))
+        "Toy photography of ONE highly detailed collectible designer figure: an original character, %s whose "
+        "job is %s. Loud, proud and unmistakable for this job. Stylised proportions with a large head, "
+        "expressive eyes and a big grin. The character: %s. In one hand: %s. Pose: %s. On the wrist of the "
+        "raised fist: a chunky smart wristband with one bright glowing light, clearly visible. Under the feet: "
+        "%s. Main colours %s and %s, with strong contrast. Layered materials: matte vinyl skin, textured "
+        "fabric, shiny metal, glossy details. Dramatic studio light with a coloured rim light, seen from "
+        "slightly below, a slight tilt for energy. The whole figure and its base are inside the picture and "
+        "fill about 88 percent of its height, centred. Background: ONE flat solid colour, %s, no gradient. "
+        "Portrait picture. No text, no letters, no numbers, no logos, no brand names, no watermark. An "
+        "original design, not based on any existing character, mascot or toy line."
+        % (FIGURES.get(figure, "a person"), role["title"], look, tool, pose, scene, role["suit"], role["cape"],
+           backdrop(role)))
 
 
 def _ask(model, key, text, shape):
