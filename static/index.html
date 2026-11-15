@@ -245,14 +245,38 @@
   .invent div { display:flex; gap:8px; }
   .invent input { flex:1; min-width:0; padding:10px 12px; font-size:19px; border:var(--edge) solid var(--ink); border-radius:var(--round); background:var(--paper); color:var(--pen); }
   .invent small { display:block; min-height:1.5em; margin-top:6px; font-size:15px; }
-  .boardacts { display:flex; align-items:center; gap:14px; margin:14px 0 16px; }
-  .brow { display:grid; grid-template-columns:74px minmax(0,1fr) 110px 120px 110px; gap:14px; align-items:center; padding:12px 0; border-top:1px solid color-mix(in srgb, currentColor 18%, transparent); }
-  .brow b { font-weight:700; } .brow small { display:block; opacity:.7; }
-  .brow .sum { text-align:right; font:var(--display-weight) 20px/1 var(--display); }
-  .brow a { color:inherit; }
-  .state { justify-self:start; padding:5px 12px; border-radius:99px; font-weight:700; font-size:13px; background:#ffe7a8; color:#5b4300; }
+  .views { display:flex; gap:4px; padding:4px; border-radius:999px; border:1px solid color-mix(in srgb, currentColor 30%, transparent); }
+  .views { flex:none; }
+  .views button { white-space:nowrap; padding:9px 20px; border:0; border-radius:999px; background:transparent; color:inherit; font:700 16px/1 var(--display); box-shadow:none; }
+  .views button[aria-pressed="true"] { background:var(--ink); color:var(--on-ink); }
+  [data-look="stage"] .views button[aria-pressed="true"] { background:#fff; color:#0b1020; }
+  main[hidden], .steps[hidden], .hood[hidden], .setup[hidden] { display:none !important; }
+  #boardview { flex:1; min-height:0; overflow:auto; padding:18px 34px 26px; }
+  #boardview[hidden] { display:none; }
+  .bhead { display:flex; align-items:center; gap:28px; flex-wrap:wrap; margin-bottom:22px; }
+  .btitle { margin-right:auto; } .btitle h2 { margin:0 0 4px; font:var(--display-weight) 44px/1 var(--display); letter-spacing:var(--display-gap); } .btitle p { margin:0; opacity:.8; }
+  .btiles { display:flex; gap:12px; }
+  .btiles div { min-width:132px; padding:14px 18px; border-radius:18px; border:1px solid color-mix(in srgb, currentColor 22%, transparent); background:color-mix(in srgb, currentColor 7%, transparent); }
+  .btiles b { display:block; font:var(--display-weight) 28px/1 var(--display); } .btiles span { display:block; margin-top:6px; font-size:14px; opacity:.75; }
+  #boardnew { padding:16px 28px; font-size:18px; }
+  .bbody { display:grid; grid-template-columns:minmax(0,1fr); gap:24px; align-items:start; }
+  .bbody.open { grid-template-columns:minmax(0,1fr) minmax(320px,400px); }
+  .bcards { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:14px; }
+  .bcard { display:flex; flex-direction:column; gap:10px; padding:18px 20px; text-align:left; border-radius:22px; cursor:pointer; color:inherit; border:1px solid color-mix(in srgb, currentColor 22%, transparent); background:color-mix(in srgb, currentColor 7%, transparent); box-shadow:none; font:inherit; }
+  .bcard:hover, .bcard[aria-pressed="true"] { border-color:currentColor; background:color-mix(in srgb, currentColor 13%, transparent); }
+  .bcard .when { display:flex; justify-content:space-between; align-items:center; font-size:14px; opacity:.9; }
+  .bcard .sum { font:var(--display-weight) 34px/1 var(--display); letter-spacing:var(--display-gap); }
+  .bcard .what { font-weight:700; font-size:17px; line-height:1.25; } .bcard small { opacity:.72; font-size:14px; }
+  .state { padding:5px 12px; border-radius:99px; font-weight:700; font-size:13px; background:#ffe7a8; color:#5b4300; }
   .state.paid { background:#c9f7dd; color:#0b6b3a; } .state.void { background:#e4e6ee; color:#4b5168; }
-  .empty { padding:26px 0; opacity:.7; }
+  .empty { padding:40px 0; opacity:.75; font-size:19px; }
+  .bdetail { padding:22px 24px; border-radius:22px; background:#fff; color:#0b1020; }
+  .bdetail h3 { margin:0 0 4px; font:var(--display-weight) 26px/1.1 var(--display); } .bdetail p { margin:0 0 12px; }
+  .bdetail .line { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid #e1e6f3; }
+  .bdetail .total { display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; font:var(--display-weight) 30px/1 var(--display); }
+  .bdetail img { width:132px; height:132px; display:block; margin:6px 0 10px; }
+  .bdetail a { color:#1f4fd8; word-break:break-all; font-size:14px; }
+  .bdetail button { margin-top:14px; }
   .shut { position:sticky; top:0; float:right; z-index:10; margin:0 0 0 12px; }
   [data-look="stage"] .shut { background:#fff; color:#0b1020; border-color:#fff; box-shadow:0 8px 24px rgba(0,0,0,.5); }
 
@@ -315,8 +339,8 @@
 <header class="top">
   <h1 class="brand">TapJob</h1>
   <span class="shop" id="shop"></span>
+  <nav class="views" aria-label="Views"><button id="viewjob" aria-pressed="true">Job</button><button id="openboard" aria-pressed="false">Dashboard</button></nav>
   <span class="payee push" id="payee"></span>
-  <button class="small" id="openboard">Dashboard</button>
   <button class="small" id="look" title="Switch the look of this page">Look: carbon copy</button>
   <span class="link off" id="link"><b></b><span id="linktext">Looking for the band</span></span>
 </header>
@@ -380,6 +404,22 @@
   </section>
 </main>
 
+<section id="boardview" hidden>
+  <div class="bhead">
+    <div class="btitle"><h2>Dashboard</h2><p id="boardsum"></p></div>
+    <div class="btiles">
+      <div><b id="bpaid">$0.00</b><span>Paid</span></div>
+      <div><b id="bwait">$0.00</b><span>Waiting</span></div>
+      <div><b id="bcount">0</b><span>Bills sent</span></div>
+    </div>
+    <button class="solid" id="boardnew">New job</button>
+  </div>
+  <div class="bbody">
+    <div class="bcards" id="boardrows"></div>
+    <aside class="bdetail" id="bdetail" hidden></aside>
+  </div>
+</section>
+
 <details class="hood">
   <summary>Under the hood</summary>
   <div><button class="small" id="teach">Teach the raised fist</button> <span id="fist"></span></div>
@@ -398,14 +438,6 @@
     <div><input id="sentence" maxlength="200" placeholder="I fix rockets on the launch pad" autocomplete="off"><button class="solid" id="make">Make my hero</button></div>
     <small id="making"></small>
   </form>
-</dialog>
-
-<dialog id="board" aria-labelledby="boardtitle">
-  <button class="small shut" id="shutboard">Close</button>
-  <h2 id="boardtitle">Dashboard</h2>
-  <p id="boardsum"></p>
-  <div class="boardacts"><button class="solid" id="boardnew">New job</button><small id="boardhint"></small></div>
-  <div id="boardrows"></div>
 </dialog>
 
 <dialog id="prices" aria-labelledby="pricestitle">
@@ -513,40 +545,64 @@ const tint = (box) => {                         // the poster takes the picture'
 };
 
 /* ---- buttons ---- */
-$('tap').onclick = () => post('page-tap');
+$('tap').onclick = () => post(latest && (latest.phase === 'sent' || latest.phase === 'paid') ? 'new' : 'page-tap');
 $('send').onclick = () => post('send');
 $('discard').onclick = () => post('discard');
 $('add').onclick = () => { const t = $('typed').value.trim(); if (t) { post('say', t); $('typed').value = ''; } };
 $('teach').onclick = () => post('teach-raise');
 $('change').onclick = () => $('jobs').showModal();
-$('openboard').onclick = () => $('board').showModal();
-$('shutboard').onclick = () => $('board').close();
+$('shut').onclick = () => $('jobs').close();
+let view = 'job', picked = null;
+function setView(name) {
+  view = name;
+  for (const part of [$('steps'), document.querySelector('main'), document.querySelector('.hood'), $('setup')]) if (part) part.hidden = name !== 'job';
+  $('boardview').hidden = name !== 'board';
+  $('viewjob').setAttribute('aria-pressed', String(name === 'job')); $('openboard').setAttribute('aria-pressed', String(name === 'board'));
+}
+$('viewjob').onclick = () => setView('job');
+$('openboard').onclick = () => setView('board');
 $('next').onclick = () => post('new');
-$('boardnew').onclick = () => { post('new'); $('board').close(); };
+$('boardnew').onclick = () => { if (latest && (latest.phase === 'sent' || latest.phase === 'paid')) post('new'); setView('job'); };
 const STATES = { sent: 'Waiting', paid: 'Paid', void: 'Taken back' };
+const clock = (t) => new Date(t * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+function drawDetail(s) {
+  const box = $('bdetail'), j = (s.history || []).find((job) => job.id === picked);
+  $('boardrows').parentElement.classList.toggle('open', !!j); box.hidden = !j; box.replaceChildren();
+  if (!j) return;
+  box.append(el('span', STATES[j.status] || j.status, 'state ' + j.status), el('h3', j.customer || 'Customer'), el('p', j.summary || (j.lines + ' lines')));
+  for (const item of j.items || []) { const row = el('div', null, 'line'); row.append(el('span', item.description + (item.quantity !== 1 ? ' × ' + item.quantity : '')), el('b', money(item.amount))); box.append(row); }
+  const total = el('div', null, 'total'); total.append(el('span', 'Total'), el('span', money(j.total))); box.append(total);
+  box.append(el('p', (j.hero ? j.hero + ', ' : '') + (j.business || '') + '. Sent ' + clock(j.at) + (j.paid_at ? ', paid ' + clock(j.paid_at) : '') + '.'));
+  if (j.status === 'sent' && j.url) {
+    const code = el('img'); code.alt = 'Code the customer scans to pay'; code.src = 'https://api.qrserver.com/v1/create-qr-code/?size=264x264&data=' + encodeURIComponent(j.url);
+    const link = el('a', 'Open the payment page'); link.href = j.url; link.target = '_blank'; link.rel = 'noopener'; box.append(code, link);
+  }
+  if (s.invoice && s.invoice.id === j.id) { const go = el('button', 'Open this job', 'solid'); go.onclick = () => setView('job'); box.append(el('br'), go); }
+}
 function drawBoard(s) {
   const jobs = s.history || [], open = jobs.filter((j) => j.status === 'sent'), paid = jobs.filter((j) => j.status === 'paid');
   const add = (list) => list.reduce((sum, j) => sum + (Number(j.total) || 0), 0);
-  $('openboard').textContent = 'Dashboard' + (jobs.length ? ' (' + paid.length + ' paid, ' + open.length + ' waiting)' : '');
-  $('boardsum').textContent = jobs.length ? paid.length + ' paid, ' + money(add(paid)) + '. ' + open.length + ' waiting, ' + money(add(open)) + '.'
-    : 'Every bill you send shows up here, with whether it has been paid.';
-  const can = s.phase === 'sent' || s.phase === 'paid';
-  $('boardnew').disabled = !can; $('next').hidden = !can;
-  $('boardhint').textContent = s.phase === 'sent' ? 'The bill you just sent stays here while you start the next job.'
-    : s.phase === 'idle' ? 'Ready. Double-tap the band to start a job.' : can ? '' : 'A job is in progress.';
-  const rows = $('boardrows'), key = JSON.stringify(jobs.map((j) => [j.id, j.status]));
-  if (rows.dataset.key === key) return;                       // nothing changed: leave the list alone
+  $('openboard').textContent = 'Dashboard' + (jobs.length ? ' (' + jobs.length + ')' : '');
+  $('boardsum').textContent = jobs.length ? 'Every bill you sent. Pick one to open it.' : 'Every bill you send shows up here, with whether it has been paid.';
+  $('bpaid').textContent = money(add(paid)); $('bwait').textContent = money(add(open)); $('bcount').textContent = String(jobs.length);
+  const busy = s.phase === 'recording' || s.phase === 'thinking' || s.phase === 'draft' || s.phase === 'sending';
+  $('boardnew').textContent = busy ? 'Back to the job' : 'New job';
+  const after = s.phase === 'sent' || s.phase === 'paid';          // the bill is out: the first button starts the next job
+  $('tap').textContent = after ? 'New job' : 'Double-tap'; $('send').hidden = after; $('next').hidden = true;
+  const rows = $('boardrows'), key = JSON.stringify([jobs.map((j) => [j.id, j.status]), picked]);
+  if (rows.dataset.key === key) return;                       // nothing changed: leave the cards alone
   rows.dataset.key = key; rows.replaceChildren();
-  if (!jobs.length) rows.append(el('div', 'No bills yet.', 'empty'));
+  if (!jobs.length) rows.append(el('div', 'No bills yet. Send one and it lands here.', 'empty'));
   for (const j of jobs) {
-    const row = el('div', null, 'brow'), what = el('div'), when = new Date(j.at * 1000);
-    what.append(el('b', j.customer || j.summary || (j.lines + ' lines')), el('small', (j.hero ? j.hero + ', ' : '') + (j.business || '')));
-    const link = el('a', 'Payment page'); link.href = j.url; link.target = '_blank'; link.rel = 'noopener';
-    row.append(el('span', when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })), what, el('span', STATES[j.status] || j.status, 'state ' + j.status), link, el('span', money(j.total), 'sum'));
-    rows.append(row);
+    const card = el('button', null, 'bcard'), when = el('div', null, 'when'); card.type = 'button'; card.setAttribute('aria-pressed', String(j.id === picked));
+    when.append(el('span', clock(j.at)), el('span', STATES[j.status] || j.status, 'state ' + j.status));
+    card.append(when, el('div', money(j.total), 'sum'), el('div', j.customer || j.summary || (j.lines + ' lines'), 'what'), el('small', (j.hero ? j.hero + ', ' : '') + (j.business || '')));
+    card.onclick = () => { picked = picked === j.id ? null : j.id; drawBoard(latest); };
+    rows.append(card);
   }
+  drawDetail(s);
 }
-$('shut').onclick = () => $('jobs').close();
+
 function setLook(name) {
   if (!LOOKS[name]) name = 'stage';
   document.documentElement.dataset.look = name; $('look').textContent = 'Look: ' + LOOKS[name];

@@ -504,7 +504,12 @@ class Hub:
         self.history.insert(0, {
             "id": invoice["id"], "url": invoice.get("url", ""), "total": draft.get("total", 0),
             "customer": draft.get("customer") or "", "summary": draft.get("summary") or "",
-            "lines": len(draft.get("items") or []), "business": self.role["business"], "hero": self.role.get("hero", ""),
+            "lines": len(draft.get("items") or []),
+            "items": [{"description": i.get("description", ""), "quantity": i.get("quantity", 1), "amount": i.get("amount", 0)}
+                      for i in draft.get("items") or []]
+                     + ([{"description": "Labor %s h" % draft["labor"]["hours"], "quantity": 1, "amount": draft["labor"]["amount"]}]
+                        if draft.get("labor") else []),
+            "business": self.role["business"], "hero": self.role.get("hero", ""),
             "at": time.time(), "status": "sent", "paid_at": None})
         self.save_history()
 
