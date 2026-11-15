@@ -159,6 +159,19 @@
   .size span { display:block; margin-top:10px; font-size:14.5px; line-height:1.35; color:var(--soft); }
   .scenes { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; padding:0; list-style:none; }
   .scenes li { padding:8px 15px; border:1px solid var(--line); border-radius:999px; font:600 14.5px/1 var(--display); }
+  /* ---- try it here, on the pretend band ---- */
+  .lab { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start; padding:24px; border:1px solid var(--line); border-radius:32px; background:linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.02)); }
+  .lab label { display:block; margin:18px 0 8px; font:700 14px/1.2 var(--display); }
+  .lab textarea { display:block; width:100%; padding:14px 16px; border-radius:16px; border:1px solid rgba(255,255,255,.3); background:rgba(0,0,0,.4); color:var(--ink); font:600 18px/1.45 var(--text); resize:vertical; }
+  .lab .calls { margin-top:14px; }
+  .lab .button:disabled { opacity:.4; cursor:default; }
+  .lab .ticket { transform:none; min-height:210px; }
+  .lab .row { opacity:1; transform:none; }
+  .lrow { display:flex; align-items:center; gap:12px; padding:10px 0; border-top:1px solid var(--line); font:600 15px/1.3 var(--text); }
+  .lrow span:first-child { flex:1; } .lrow b { font:800 17px/1 var(--display); }
+  .lrow i { font:700 12px/1 var(--display); font-style:normal; padding:5px 10px; border-radius:99px; background:#ffe7a8; color:#5b4300; } .lrow i.ok { background:#c9f7dd; color:#0b6b3a; }
+  #lboard { margin-top:16px; } #lboard:empty { display:none; }
+  #lboard::before { content:"Dashboard"; display:block; margin-bottom:6px; font:700 14px/1 var(--display); opacity:.7; }
   .vision { padding:150px 0 50px; text-align:center; }
   .vision h2 { margin:0 auto 24px; max-width:15ch; font:800 clamp(40px, 6.2vw, 88px)/.98 var(--display); letter-spacing:-.055em; text-wrap:balance; }
   .vision p { max-width:50ch; margin:0 auto; font-size:21px; color:var(--soft); }
@@ -201,7 +214,7 @@
 
   .rise { opacity:0; transform:translateY(22px); transition:opacity 600ms, transform 600ms; }
   .rise.in { opacity:1; transform:none; }
-  @media (max-width: 980px) { .top, .try, .beat, .problem, .hand, .who { grid-template-columns:1fr; } .beat { gap:30px; min-height:0; padding:70px 0 20px; } .beat.flip .words { order:0; } .problem { min-height:0; } .notes { height:400px; } .notes div { width:210px; font-size:17px; } .dots, .count { display:none; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .rules, .next { grid-template-columns:1fr; } .size { grid-template-columns:1fr 1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
+  @media (max-width: 980px) { .top, .try, .beat, .problem, .hand, .who, .lab { grid-template-columns:1fr; } .beat { gap:30px; min-height:0; padding:70px 0 20px; } .beat.flip .words { order:0; } .problem { min-height:0; } .notes { height:400px; } .notes div { width:210px; font-size:17px; } .dots, .count { display:none; } .steps { grid-template-columns:1fr 1fr; } .heroes { grid-template-columns:1fr 1fr; } .rules, .next { grid-template-columns:1fr; } .size { grid-template-columns:1fr 1fr; } .stage { grid-template-columns:1fr; } .ticket { transform:none; } .own { grid-template-columns:1fr; } nav a:not(.button) { display:none; } }
   @media (prefers-reduced-motion: reduce) { .band.live i { animation:none; height:22px; } .rise { opacity:1; transform:none; transition:none; } .row, .paid, .hero, .phone, body, .dots a { transition:none; } .phone.back { transform:rotate(-4deg); opacity:.94; } .phone.front { transform:translateY(54px) rotate(2.5deg); opacity:1; } html { scroll-behavior:auto; } }
 </style>
 </head>
@@ -212,7 +225,7 @@
     <a href="#why">Why</a>
     <a href="#does">What changes</a>
     <a href="#heroes">Who it is for</a>
-    <a href="#ai">Hand it to your AI</a>
+    <a href="#live">Try it here</a>
     <a href="https://github.com/HERO-1900/tapjob">Code</a>
     <a class="button" href="#try">Open the app</a>
   </nav>
@@ -225,7 +238,7 @@
       <p class="lede">A wrist band that listens while you work. Hands full, hands dirty, phone in your pocket: just say what you did. The bill is ready before you walk out the door.</p>
       <div class="calls">
         <a class="button" href="#why">See why</a>
-        <a class="button line" href="#heroes">Find your job</a>
+        <a class="button line" href="#live">Try it here</a>
       </div>
     </div>
     <div class="demo" aria-label="A replay of one job, from the first double-tap to paid">
@@ -329,6 +342,35 @@
     <li><b>Shake to undo</b>A quick shake of the wrist takes the last ticket back, without touching a screen.</li>
     <li><b>A shell for every brand</b>The band in your shop's colours, the hero in your uniform.</li>
   </ul>
+
+  <h2 id="live" class="rise" data-s="Try it here">Try it right here</h2>
+  <p class="sub rise">No band on your wrist? Use the pretend one. Pick a job, type or say what you did, and take it all the way to paid. Nothing to install, no sign-up.</p>
+  <div class="lab rise">
+    <div>
+      <div class="chips" id="ljobs" role="group" aria-label="Pick a job"></div>
+      <label for="lsay">What you say into the band</label>
+      <textarea id="lsay" rows="3" spellcheck="false"></textarea>
+      <div class="calls">
+        <button class="button" id="lgo" type="button">Double-tap: write the ticket</button>
+        <button class="button line" id="lmic" type="button" hidden>Use my microphone</button>
+      </div>
+      <p class="label" id="lhint"></p>
+    </div>
+    <div>
+      <div class="ticket">
+        <header><span id="lbiz" style="font:800 17px/1.1 var(--display);color:#0b1020;letter-spacing:-.03em"></span><span>ticket</span></header>
+        <div id="lrows"></div>
+        <div class="sum"><span>Total</span><output id="ltotal"></output></div>
+        <div class="paid" id="lpaid">PAID</div>
+      </div>
+      <div class="calls">
+        <button class="button" id="lsend" type="button" disabled>Fist up: send the bill</button>
+        <button class="button line" id="lpay" type="button" disabled>Customer pays</button>
+      </div>
+      <div id="lboard"></div>
+      <p class="note">A pretend band and a pretend payment, running in your browser. On the real band the same steps create a Stripe invoice.</p>
+    </div>
+  </div>
 
   <h2 id="try" class="rise" data-s="Open the app">Open the app</h2>
   <div class="try rise">
@@ -509,6 +551,71 @@ BEATS.forEach((beat, i) => {
   shots.append(duo, el('p', 'cap', 'Phone app: design preview'));
   sec.append(words, shots); $('beats').append(sec);
 });
+
+/* ---- try it here: the pretend band. Prices are looked up in the job's price list, in plain code. ---- */
+const SHOPS = [
+  { name: 'Drive-through', biz: 'Sunset Drive-In', rate: 0, say: 'Two double cheeseburgers, one fries, a diet soda and a shake.',
+    prices: [['Hamburger', 4.5], ['Cheeseburger', 5], ['Double cheeseburger', 6.9], ['Fries', 2.8], ['Shake', 3.6], ['Soda', 2.4], ['Diet soda', 2.4]] },
+  { name: 'Plumber', biz: 'Wang & Sons Plumbing', rate: 95, say: 'Job for Mrs. Chen. Replaced the faucet cartridge and two supply lines. One hour of labor.',
+    prices: [['P-trap', 18], ['Supply line', 12], ['Faucet cartridge', 45], ['Shutoff valve', 22], ['Wax ring', 9], ['Drain cleaning', 120]] },
+  { name: 'Massage', biz: 'Calm Hands Studio', rate: 0, say: 'Session for Ms. Rivera. A 90-minute massage with hot stones.',
+    prices: [['60-minute massage', 110], ['90-minute massage', 150], ['Hot stones', 25], ['Aromatherapy', 15], ['Cupping', 30]] },
+  { name: 'Mechanic', biz: 'Northside Auto Repair', rate: 140, say: 'Job for Mr. Diaz. Changed the brake pads and the air filter. Two hours of labor.',
+    prices: [['Oil change', 79], ['Brake pads', 95], ['Battery', 180], ['Air filter', 28], ['Wiper blades', 32], ['Spark plug', 14]] },
+];
+const COUNT = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+const dollars = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const plain = (t) => ' ' + t.toLowerCase().replace(/-/g, ' ').replace(/\.(?!\d)/g, ' ').replace(/[^a-z0-9. ]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+function readOrder(text, shop) {
+  let rest = plain(text); const lines = [], whole = rest;
+  const number = '(?:(\\d+|' + Object.keys(COUNT).join('|') + ') )?';
+  for (const [name, price] of [...shop.prices].sort((a, b) => b[0].length - a[0].length)) {      // longest names first
+    const stem = plain(name).trim().replace(/s$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    let quantity = 0;
+    rest = rest.replace(new RegExp(' ' + number + stem + '(?:e?s)? ', 'g'), (hit, n) => { quantity += n ? (COUNT[n] || Number(n)) : 1; return ' , '; });
+    if (quantity) lines.push([name + (quantity > 1 ? ' × ' + quantity : ''), quantity * price, 'price list', whole.indexOf(plain(name).trim().replace(/s$/, ''))]);
+  }
+  if (shop.rate) {
+    const said = rest.match(/ (\d+(?:\.\d+)?|half an|an|a|one|two|three|four|five|six|seven|eight|nine|ten)( and a half)? hours? /);
+    if (said) {
+      const hours = (said[1] === 'half an' ? 0.5 : COUNT[said[1]] || Number(said[1])) + (said[2] ? 0.5 : 0);
+      lines.push(['Labor ' + hours + ' h at $' + shop.rate + '/h', hours * shop.rate, 'said', Infinity]);
+    }
+  }
+  return lines.sort((a, b) => a[3] - b[3]);                                 // in the order they were said, labor last
+}
+let shop = SHOPS[0], bill = null; const sent = [];
+function board() {
+  $('lboard').replaceChildren(...sent.map((job) => { const row = el('div', 'lrow'); row.append(el('span', '', job.biz), el('i', job.paid ? 'ok' : '', job.paid ? 'Paid' : 'Waiting'), el('b', '', dollars(job.total))); return row; }));
+}
+function pick(next) {
+  shop = next; bill = null;
+  all('#ljobs button').forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === shop.name)));
+  $('lsay').value = shop.say; $('lbiz').textContent = shop.biz; $('lrows').replaceChildren(); $('ltotal').textContent = ''; $('lpaid').className = 'paid';
+  $('lsend').disabled = true; $('lpay').disabled = true;
+  $('lhint').textContent = 'On the price list: ' + shop.prices.map(([name, price]) => name + ' ' + dollars(price)).join(', ') + '.' + (shop.rate ? ' Labor is $' + shop.rate + ' an hour.' : '');
+}
+for (const s of SHOPS) { const b = el('button', '', s.name); b.type = 'button'; b.onclick = () => pick(s); $('ljobs').append(b); }
+$('lgo').onclick = () => {
+  const lines = readOrder($('lsay').value, shop);
+  $('lrows').replaceChildren(); $('lpaid').className = 'paid'; $('lpay').disabled = true;
+  if (!lines.length) { bill = null; $('ltotal').textContent = ''; $('lsend').disabled = true; $('lrows').append(el('div', 'row', 'Nothing from the price list was heard. Name an item from the list on the left.')); return; }
+  lines.forEach(([what, amount, tag]) => $('lrows').append(line(what, dollars(amount), tag === 'price list')));
+  bill = { biz: shop.biz, total: lines.reduce((sum, l) => sum + l[1], 0), paid: false };
+  $('ltotal').textContent = dollars(bill.total); $('lsend').disabled = false;
+};
+$('lsend').onclick = () => { if (!bill) return; sent.unshift(bill); board(); $('lsend').disabled = true; $('lpay').disabled = false; };
+$('lpay').onclick = () => { if (!bill) return; bill.paid = true; bill = null; board(); $('lpaid').classList.add('on'); $('lpay').disabled = true; };
+const Hear = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (Hear && window.isSecureContext) {
+  $('lmic').hidden = false;
+  $('lmic').onclick = () => {
+    const ear = new Hear(); ear.lang = 'en-US'; ear.interimResults = false; $('lmic').textContent = 'Listening…';
+    ear.onresult = (e) => { $('lsay').value = e.results[0][0].transcript; $('lgo').click(); };
+    ear.onend = () => { $('lmic').textContent = 'Use my microphone'; }; ear.onerror = ear.onend; ear.start();
+  };
+}
+pick(SHOPS[0]);
 
 $('copy').onclick = async () => {
   try { await navigator.clipboard.writeText($('line').textContent); $('copy').textContent = 'Copied'; }
