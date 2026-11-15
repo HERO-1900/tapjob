@@ -1,6 +1,26 @@
 # TapJob
 
-**Demo video:** https://tapjob.ipolab.ai/demo.mp4 (recorded on the real band, 14 November 2026)
+**Demo video:** https://youtu.be/KABnEHq4yAY (recorded on the real band, 14 November 2026; also at https://tapjob.ipolab.ai/demo.mp4)
+
+## Screenshots
+
+The ticket on the real band: the words on the left, the prices looked up from the menu on the right.
+
+![The ticket, priced from the menu, on the real band](docs/shots/ticket.jpg)
+
+Sent: the customer scans the code and pays on their own phone.
+
+![Sent, with the code the customer scans to pay](docs/shots/sent.jpg)
+
+The dashboard: every bill that went out, waiting or paid (this one is from the pretend band).
+
+![The dashboard with three bills](docs/shots/dashboard.jpg)
+
+Every job has a hero, and the project page shows the app design.
+
+![Hero cards](docs/cards.jpg)
+
+![The project page](docs/shots/site.jpg)
 
 **Every job has a hero. Say it, tap it, get paid.** A wrist band for people whose hands are
 busy: double-tap, say what you did or what was ordered, double-tap again, and the customer
